@@ -1,57 +1,65 @@
 // src/services/user.service.ts
 
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { UserModel } from '../models/user.model';
 import { User } from '../types/user.type';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
 
 export class UserService {
-  private readonly JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-  
   constructor(private userModel: UserModel) {}
 
-  async createUser(user: User) {
+  // Create a new user with hashed password
+  async createUser(user: User): Promise<User> {
+    const existingUser = await this.userModel.getUserByEmail(user.email);
+    if (existingUser) {
+      throw new Error('Email is already taken');
+    }
+
+    // Hash the password before saving to the database
     const hashedPassword = await bcrypt.hash(user.password, 10);
     const userWithHashedPassword = { ...user, password: hashedPassword };
-    return this.userModel.create(userWithHashedPassword);
+
+    return await this.userModel.create(userWithHashedPassword);
   }
 
-  async login(email: string, password: string) {
+  // User login logic
+  async login(email: string, password: string): Promise<string> {
     const user = await this.userModel.getUserByEmail(email);
     if (!user) {
       throw new Error('User not found');
     }
 
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) {
-      throw new Error('Invalid credentials');
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new Error('Invalid password');
     }
 
+    // Create and return a JWT token
     const token = jwt.sign(
-      { userId: user.user_id, role: user.role }, // Include user role for authorization checks
-      this.JWT_SECRET,
-      { expiresIn: '24h' } // Token expiration time
+      { userId: user.id, peran: user.peran },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '1h' }
     );
-
     return token;
   }
 
-  async getAllUsers() {
+  // Retrieve all users
+  async getAllUsers(): Promise<User[]> {
     return await this.userModel.findAllUsers();
   }
 
-  async getUserByEmail(email: string) {
-    return this.userModel.getUserByEmail(email);
+  // Retrieve a user by email
+  async getUserByEmail(email: string): Promise<User | null> {
+    return await this.userModel.getUserByEmail(email);
   }
 
-  async updateUser(email: string, userUpdates: Partial<User>) {
-    if (userUpdates.password) {
-      userUpdates.password = await bcrypt.hash(userUpdates.password, 10);
-    }
-    return this.userModel.updateUser(email, userUpdates);
+  // Update user data by email
+  async updateUser(email: string, userUpdates: Partial<User>): Promise<User | null> {
+    return await this.userModel.updateUser(email, userUpdates);
   }
 
-  async deleteUser(email: string) {
-    return this.userModel.deleteUser(email);
+  // Delete a user by email
+  async deleteUser(email: string): Promise<void> {
+    await this.userModel.deleteUser(email);
   }
 }

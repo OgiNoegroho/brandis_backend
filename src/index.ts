@@ -1,12 +1,12 @@
 // src/index.ts
 
 import express from 'express';
-import mysql from 'mysql2/promise';
+import { Pool } from 'pg'; // PostgreSQL client
 import { dbConfig } from './config/environment';
-import { userRoutes } from './routes/user.route';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import { userRoutes } from './routes/user.route';
 import { productRoutes } from './routes/product.route';
 
 const app = express();
@@ -23,21 +23,21 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-let dbPool: mysql.Pool;
+let dbPool: Pool;
 
 // Database connection function
-const createDbConnection = async (): Promise<mysql.Pool> => {
-  const pool = mysql.createPool({
-    ...dbConfig,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
+const createDbConnection = async (): Promise<Pool> => {
+  const pool = new Pool({
+    ...dbConfig, // PostgreSQL configuration (from environment)
+    max: 10, // Connection pool size
+    idleTimeoutMillis: 30000, // Connection idle timeout
+    connectionTimeoutMillis: 2000, // Connection timeout
   });
 
   try {
-    const connection = await pool.getConnection();
+    const client = await pool.connect();
     console.log('Database connection established');
-    connection.release();
+    client.release(); // Release the connection back to the pool
     return pool;
   } catch (error) {
     console.error('Database connection failed:', error);

@@ -1,18 +1,18 @@
 // src/types/product.type.ts
 export interface Product {
-  id: string;
-  name: string;
-  category: string;
-  price: number;
-  composition: string;
-  description: string;
-  createdAt: Date;
+  id: number;             // Align with SERIAL in the DB
+  nama: string;           // Matches TEXT in the DB
+  kategori?: string;      // Optional since `kategori` can be NULL in the DB
+  komposisi?: string;     // Optional since `komposisi` can be NULL in the DB
+  deskripsi?: string;     // Optional since `deskripsi` can be NULL in the DB
+  harga: number;          // Matches NUMERIC(10, 2)
 }
 
 export interface ProductDTO {
-  name: string;
-  category: string;
-  price: number;
-  composition: string;
-  description: string;
+  nama: string;           // Required for creation
+  kategori?: string;      // Optional
+  komposisi?: string;     // Optional
+  deskripsi?: string;     // Optional
+  harga: number;          // Required for creation
 }
+

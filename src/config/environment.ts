@@ -1,9 +1,6 @@
 // src/config/environment.ts
 
-
-
-
-import mysql, { Pool } from 'mysql2/promise';
+import { Pool } from 'pg';
 import { config } from 'dotenv';
 
 // Load environment variables from .env file
@@ -11,7 +8,7 @@ config();
 
 const hostname = process.env.DB_HOST;
 const database = process.env.DB_DATABASE;
-const port = process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306; // Default to 3306 if not provided
+const port = process.env.DB_PORT ? Number(process.env.DB_PORT) : 5432; // Default to 5432 for PostgreSQL if not provided
 const username = process.env.DB_USER;
 const password = process.env.DB_PASSWORD;
 
@@ -26,14 +23,16 @@ export const dbConfig = {
   password: password,
   database: database,
   port: port,
+  connectionTimeoutMillis: 10000,
 };
 
 export const createDbConnection = async (): Promise<Pool> => {
-  const pool = mysql.createPool(dbConfig);
+  const pool = new Pool(dbConfig);
 
   try {
-    await pool.getConnection();
-    console.log('Connected to the database!');
+    // Attempt to connect to the PostgreSQL database
+    await pool.connect();
+    console.log('Connected to the PostgreSQL database!');
   } catch (err) {
     console.error('Database connection error:', err);
     throw err;

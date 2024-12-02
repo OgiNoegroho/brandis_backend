@@ -1,6 +1,6 @@
 // src/routes/product.route.ts
 import { Router } from 'express';
-import { Pool } from 'mysql2/promise';
+import { Pool } from 'pg';
 import { ProductModel } from '../models/product.model';
 import { ProductService } from '../services/product.service';
 import { ProductController } from '../controllers/product.controller';

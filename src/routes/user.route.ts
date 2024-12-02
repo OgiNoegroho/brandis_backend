@@ -1,22 +1,28 @@
 // src/routes/user.route.ts
 import express, { Request, Response, NextFunction } from 'express';
 import { UserController } from '../controllers/user.controller';
-import { Pool } from 'mysql2/promise';
+import { Pool } from 'pg';
 import { validate, validateEmailExists } from '../validation/user.validation';
 import { createUserValidation, createSessionValidation, updateUserValidation } from '../validation/user.validation';
 import { authMiddleware } from '../middleware/auth';
 import { UserModel } from '../models/user.model';
+import { UserService } from '../services/user.service';
 
 export const userRoutes = (dbPool: Pool) => {
   const router = express.Router();
-  const userController = new UserController(dbPool);
+  
+  // Initialize UserModel and UserService
   const userModel = new UserModel(dbPool);
+  const userService = new UserService(userModel);
+  
+  // Initialize UserController with UserService
+  const userController = new UserController(userService);
 
   // Route to register a new user
   router.post(
     '/register',
     validate(createUserValidation),
-    validateEmailExists(userModel), // Middleware to check if email already exists
+    validateEmailExists(dbPool),
     (req: Request, res: Response, next: NextFunction) => {
       userController.registerUser(req, res).catch(next);
     }
@@ -31,7 +37,7 @@ export const userRoutes = (dbPool: Pool) => {
     }
   );
 
-  // Route to get all users (requires authentication)
+  // Route to get all users
   router.get(
     '/',
     authMiddleware,
@@ -40,7 +46,7 @@ export const userRoutes = (dbPool: Pool) => {
     }
   );
 
-  // Route to get a single user by email (requires authentication)
+  // Route to get a single user by email
   router.get(
     '/:email',
     authMiddleware,
@@ -49,7 +55,7 @@ export const userRoutes = (dbPool: Pool) => {
     }
   );
 
-  // Route to update a user (requires authentication)
+  // Route to update a user
   router.put(
     '/:email',
     authMiddleware,
@@ -59,7 +65,7 @@ export const userRoutes = (dbPool: Pool) => {
     }
   );
 
-  // Route to delete a user (requires authentication)
+  // Route to delete a user
   router.delete(
     '/:email',
     authMiddleware,

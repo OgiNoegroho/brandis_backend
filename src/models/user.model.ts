@@ -1,67 +1,81 @@
 // src/models/user.model.ts
 
-import { Pool, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
+import { Pool } from 'pg';
 import { User } from '../types/user.type';
 
 export class UserModel {
   constructor(private db: Pool) {}
 
   async create(user: User): Promise<User> {
-    const [result] = await this.db.execute<ResultSetHeader>(
-      'INSERT INTO Users (user_id, name, email, password, role) VALUES (?, ?, ?, ?, ?)',
-      [user.user_id, user.name, user.email, user.password, user.role]
-    );
-    return { ...user, user_id: result.insertId.toString() };
+    const query = `
+      INSERT INTO brandis.pengguna (nama, email, password, peran) 
+      VALUES ($1, $2, $3, $4)
+      RETURNING id, nama, email, peran
+    `;
+    const values = [user.nama, user.email, user.password, user.peran];
+    const result = await this.db.query(query, values);
+    const newUser = result.rows[0];
+    return { ...newUser, id: newUser.id.toString() };
   }
 
   async findAllUsers(): Promise<User[]> {
-    const [rows] = await this.db.query<RowDataPacket[]>('SELECT * FROM Users');
-    return rows.map(row => ({
-      user_id: row.user_id.toString(),
-      name: row.name,
+    const query = 'SELECT id, nama, email, peran FROM brandis.pengguna';
+    const result = await this.db.query(query);
+    return result.rows.map(row => ({
+      id: row.id.toString(),
+      nama: row.nama,
       email: row.email,
-      password: row.password, // Avoid returning password in real applications; use user without it
-      role: row.role,
-    })) as User[];
+      password: row.password, // Avoid returning password in real applications
+      peran: row.peran,
+    }));
   }
 
   async getUserByEmail(email: string): Promise<User | null> {
-    if (!email) {
-      throw new Error('Email is undefined in getUserByEmail');
+    const query = 'SELECT id, nama, email, password, peran FROM brandis.pengguna WHERE email = $1';
+    const result = await this.db.query(query, [email]);
+    if (result.rows.length) {
+      const row = result.rows[0];
+      return {
+        id: row.id.toString(),
+        nama: row.nama,
+        email: row.email,
+        password: row.password,
+        peran: row.peran,
+      };
     }
-    const [rows] = await this.db.execute<RowDataPacket[]>(
-      'SELECT * FROM Users WHERE email = ?',
-      [email]
-    );
-    return rows.length ? (rows[0] as User) : null;
+    return null;
   }
-  
 
   async updateUser(email: string, userUpdates: Partial<User>): Promise<User | null> {
     const updateFields = [];
     const updateValues = [];
 
-    if (userUpdates.name) {
-      updateFields.push('name = ?');
-      updateValues.push(userUpdates.name);
+    if (userUpdates.nama) {
+      updateFields.push('nama = $1');
+      updateValues.push(userUpdates.nama);
     }
     if (userUpdates.password) {
-      updateFields.push('password = ?');
+      updateFields.push('password = $2');
       updateValues.push(userUpdates.password);
     }
-    if (userUpdates.role !== undefined) {
-      updateFields.push('role = ?');
-      updateValues.push(userUpdates.role);
+    if (userUpdates.peran) {
+      updateFields.push('peran = $3');
+      updateValues.push(userUpdates.peran);
     }
 
     updateValues.push(email);
 
-    const query = `UPDATE Users SET ${updateFields.join(', ')} WHERE email = ?`;
-    await this.db.execute<ResultSetHeader>(query, updateValues);
-    return this.getUserByEmail(email);
+    const query = `UPDATE pengguna SET ${updateFields.join(', ')} WHERE email = $${updateValues.length} RETURNING id, nama, email, peran`;
+    const result = await this.db.query(query, updateValues);
+    if (result.rows.length) {
+      const row = result.rows[0];
+      return { id: row.id.toString(), nama: row.nama, email: row.email, password: row.password, peran: row.peran };
+    }
+    return null;
   }
 
   async deleteUser(email: string): Promise<void> {
-    await this.db.execute<ResultSetHeader>('DELETE FROM Users WHERE email = ?', [email]);
+    const query = 'DELETE FROM pengguna WHERE email = $1';
+    await this.db.query(query, [email]);
   }
 }

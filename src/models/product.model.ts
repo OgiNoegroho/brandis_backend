@@ -1,5 +1,5 @@
 // src/models/product.model.ts
-import { Pool, RowDataPacket } from 'mysql2/promise';
+import { Pool, QueryResult } from 'pg';
 import { Product, ProductDTO } from '../types/product.type';
 
 export class ProductModel {
@@ -7,45 +7,51 @@ export class ProductModel {
 
   // Add a new product
   async createProduct(productData: ProductDTO): Promise<Product> {
-    const [result] = await this.db.execute(
-      'INSERT INTO Products (name, category, price, composition, description, createdAt) VALUES (?, ?, ?, ?, ?, NOW())',
-      [productData.name, productData.category, productData.price, productData.composition, productData.description]
-    );
-    const insertId = (result as any).insertId;
-    return { id: insertId, ...productData, createdAt: new Date() };
+    const query = `
+      INSERT INTO brandis.produk (nama, kategori, komposisi, deskripsi, harga)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id, nama, kategori, komposisi, deskripsi, harga;
+    `;
+    const values = [productData.nama, productData.kategori, productData.komposisi, productData.deskripsi, productData.harga];
+    const result: QueryResult = await this.db.query(query, values);
+    return result.rows[0]; // Return the inserted product
   }
 
-// Get all products with selected fields
-async findAllProducts(): Promise<{ productName: string; category: string; price: number }[]> {
-  const [rows] = await this.db.execute<RowDataPacket[]>(
-    'SELECT name AS "Product Name", category AS "Category", price AS "Price" FROM Products'
-  );
-  return rows.map(row => ({
-    productName: row['Product Name'],
-    category: row['Category'],
-    price: row['Price'],
-  }));
-}
-
+  // Get all products with selected fields
+  async findAllProducts(): Promise<{ productName: string; category: string; price: number }[]> {
+    const query = 'SELECT nama AS "ProductName", kategori AS "Category", harga AS "Price" FROM brandis.produk';
+    const result: QueryResult = await this.db.query(query);
+    return result.rows.map(row => ({
+      productName: row['ProductName'],
+      category: row['Category'],
+      price: row['Price'],
+    }));
+  }
 
   // Get a product by ID
   async findProductById(id: string): Promise<Product | null> {
-    const [rows] = await this.db.execute<RowDataPacket[]>('SELECT * FROM Products WHERE productId = ?', [id]);
-    return (rows[0] as Product) || null;
+    const query = 'SELECT * FROM brandis.produk WHERE id = $1';
+    const result: QueryResult = await this.db.query(query, [id]);
+    return result.rows.length > 0 ? result.rows[0] : null;
   }
 
-  // Edit a product by ID
+  // Update a product by ID
   async updateProduct(id: string, productData: ProductDTO): Promise<boolean> {
-    const [result] = await this.db.execute(
-      'UPDATE Products SET name = ?, category = ?, price = ?, composition = ?, description = ? WHERE productId = ?',
-      [productData.name, productData.category, productData.price, productData.composition, productData.description, id]
-    );
-    return (result as any).affectedRows > 0;
+    const query = `
+      UPDATE brandis.produk
+      SET nama = $1, kategori = $2, komposisi = $3, deskripsi = $4, harga = $5
+      WHERE id = $6
+      RETURNING id;
+    `;
+    const values = [productData.nama, productData.kategori, productData.komposisi, productData.deskripsi, productData.harga, id];
+    const result: QueryResult = await this.db.query(query, values);
+    return result.rows.length > 0; // If updated, return true
   }
 
   // Delete a product by ID
   async deleteProduct(id: string): Promise<boolean> {
-    const [result] = await this.db.execute('DELETE FROM Products WHERE productId = ?', [id]);
-    return (result as any).affectedRows > 0;
+    const query = 'DELETE FROM brandis.produk WHERE id = $1 RETURNING id';
+    const result: QueryResult = await this.db.query(query, [id]);
+    return result.rows.length > 0; // If deleted, return true
   }
 }
