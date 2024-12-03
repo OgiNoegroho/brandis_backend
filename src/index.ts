@@ -8,6 +8,8 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { userRoutes } from './routes/user.route';
 import { productRoutes } from './routes/product.route';
+import { inventoryRoutes } from './routes/inventory.route';
+
 
 const app = express();
 const port = process.env.PORT || 3008;
@@ -75,6 +77,7 @@ const initializeServer = async () => {
     // Mount user routes
     app.use('/api/users', userRoutes(dbPool));
     app.use('/api/', productRoutes(dbPool));
+    app.use('/api/', inventoryRoutes(dbPool));
 
     // Middleware for error handling
     app.use(errorHandler);

@@ -1,18 +1,26 @@
-// src/types/product.type.ts
 export interface Product {
-  id: number;             // Align with SERIAL in the DB
-  nama: string;           // Matches TEXT in the DB
-  kategori?: string;      // Optional since `kategori` can be NULL in the DB
-  komposisi?: string;     // Optional since `komposisi` can be NULL in the DB
-  deskripsi?: string;     // Optional since `deskripsi` can be NULL in the DB
-  harga: number;          // Matches NUMERIC(10, 2)
+  id: number;
+  nama: string;
+  kategori?: string;
+  komposisi?: string;
+  deskripsi?: string;
+  harga: number;
+}
+
+export interface ProductImage {
+  url: string;
+  publicId: string;
+  isPrimary: boolean;
+}
+
+export interface ProductWithImages extends Product {
+  images: ProductImage[];
 }
 
 export interface ProductDTO {
-  nama: string;           // Required for creation
-  kategori?: string;      // Optional
-  komposisi?: string;     // Optional
-  deskripsi?: string;     // Optional
-  harga: number;          // Required for creation
+  nama: string;
+  kategori?: string;
+  komposisi?: string;
+  deskripsi?: string;
+  harga: number;
 }
-

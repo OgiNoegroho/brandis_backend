@@ -1,6 +1,5 @@
-// src/controllers/product.controller.ts
 import { Request, Response } from 'express';
-import { ProductService } from '../services/product.service'; 
+import { ProductService } from '../services/product.service';
 import { ProductDTO } from '../types/product.type';
 
 export class ProductController {
@@ -15,14 +14,15 @@ export class ProductController {
   addProduct = async (req: Request, res: Response): Promise<void> => {
     try {
       const productData: ProductDTO = req.body;
-      const product = await this.productService.addProduct(productData);
+      const imageFile = req.file; // Multer middleware handles file upload
+      const product = await this.productService.addProduct(productData, imageFile);
       res.status(201).json(product);
     } catch (error) {
       this.handleError(res, error, 'Failed to add product');
     }
   };
 
-  // Get all products
+  // Get all products with images
   getAllProducts = async (_req: Request, res: Response): Promise<void> => {
     try {
       const products = await this.productService.getAllProducts();
@@ -32,7 +32,7 @@ export class ProductController {
     }
   };
 
-  // Get a product by ID
+  // Get a product by ID with images
   getProductById = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = String(req.params.id);
@@ -47,12 +47,13 @@ export class ProductController {
     }
   };
 
-  // Update a product by ID
+  // Update a product and its image
   editProduct = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = String(req.params.id);
       const productData: ProductDTO = req.body;
-      const updated = await this.productService.updateProduct(id, productData);
+      const imageFile = req.file; // Multer middleware handles file upload
+      const updated = await this.productService.updateProduct(id, productData, imageFile);
       if (updated) {
         res.status(200).json({ message: 'Product updated successfully' });
       } else {
@@ -63,7 +64,7 @@ export class ProductController {
     }
   };
 
-  // Delete a product by ID
+  // Delete a product and its associated images
   removeProduct = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = String(req.params.id);
