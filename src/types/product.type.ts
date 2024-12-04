@@ -1,3 +1,5 @@
+// src/types/user.type.ts
+
 export interface Product {
   id: number;
   nama: string;
@@ -5,6 +7,7 @@ export interface Product {
   komposisi?: string;
   deskripsi?: string;
   harga: number;
+  
 }
 
 export interface ProductImage {

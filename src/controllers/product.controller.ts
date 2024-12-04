@@ -1,3 +1,5 @@
+// src/controllers/product.controller.ts
+
 import { Request, Response } from 'express';
 import { ProductService } from '../services/product.service';
 import { ProductDTO } from '../types/product.type';
@@ -10,7 +12,7 @@ export class ProductController {
     res.status(500).json({ error: message });
   }
 
-  // Add a new product
+  // Add a new product with an image
   addProduct = async (req: Request, res: Response): Promise<void> => {
     try {
       const productData: ProductDTO = req.body;
@@ -21,8 +23,9 @@ export class ProductController {
       this.handleError(res, error, 'Failed to add product');
     }
   };
+  
 
-  // Get all products with images
+  // Retrieve all products with images
   getAllProducts = async (_req: Request, res: Response): Promise<void> => {
     try {
       const products = await this.productService.getAllProducts();
@@ -32,7 +35,7 @@ export class ProductController {
     }
   };
 
-  // Get a product by ID with images
+  // Retrieve a single product with its images
   getProductById = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = String(req.params.id);
@@ -47,7 +50,7 @@ export class ProductController {
     }
   };
 
-  // Update a product and its image
+  // Update a product with a new image
   editProduct = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = String(req.params.id);
@@ -64,7 +67,7 @@ export class ProductController {
     }
   };
 
-  // Delete a product and its associated images
+  // Delete a product and its images
   removeProduct = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = String(req.params.id);

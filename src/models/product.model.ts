@@ -1,3 +1,5 @@
+// src/models/product.model.ts
+
 import { Pool, QueryResult } from 'pg';
 import { Product, ProductDTO, ProductWithImages } from '../types/product.type';
 
@@ -29,10 +31,22 @@ export class ProductModel {
   async findAllProducts(): Promise<ProductWithImages[]> {
     const query = `
       SELECT 
-        p.id, p.nama, p.kategori, p.komposisi, p.deskripsi, p.harga,
+        p.id, 
+        p.nama, 
+        p.kategori, 
+        p.komposisi, 
+        p.deskripsi, 
+        p.harga,
         COALESCE(
-          json_agg(json_build_object('url', g.url_gambar, 'publicId', g.id_publik_gambar, 'isPrimary', g.utama)) 
-          FILTER (WHERE g.id IS NOT NULL), '[]') AS images
+          json_agg(
+            json_build_object(
+              'url', g.url_gambar,
+              'publicId', g.id_publik_gambar,
+              'isPrimary', g.utama
+            )
+          ) FILTER (WHERE g.id IS NOT NULL), 
+          '[]'
+        ) AS images
       FROM brandis.produk p
       LEFT JOIN brandis.gambar_produk g ON p.id = g.produk_id
       GROUP BY p.id;
@@ -40,15 +54,28 @@ export class ProductModel {
     const result: QueryResult = await this.db.query(query);
     return result.rows;
   }
+  
 
   // Get a product by ID with images
   async findProductById(id: string): Promise<ProductWithImages | null> {
     const query = `
       SELECT 
-        p.id, p.nama, p.kategori, p.komposisi, p.deskripsi, p.harga,
+        p.id, 
+        p.nama, 
+        p.kategori, 
+        p.komposisi, 
+        p.deskripsi, 
+        p.harga,
         COALESCE(
-          json_agg(json_build_object('url', g.url_gambar, 'publicId', g.id_publik_gambar, 'isPrimary', g.utama)) 
-          FILTER (WHERE g.id IS NOT NULL), '[]') AS images
+          json_agg(
+            json_build_object(
+              'url', g.url_gambar,
+              'publicId', g.id_publik_gambar,
+              'isPrimary', g.utama
+            )
+          ) FILTER (WHERE g.id IS NOT NULL), 
+          '[]'
+        ) AS images
       FROM brandis.produk p
       LEFT JOIN brandis.gambar_produk g ON p.id = g.produk_id
       WHERE p.id = $1
@@ -57,6 +84,7 @@ export class ProductModel {
     const result: QueryResult = await this.db.query(query, [id]);
     return result.rows.length > 0 ? result.rows[0] : null;
   }
+  
 
   // Update a product by ID
   async updateProduct(id: string, productData: ProductDTO): Promise<boolean> {
