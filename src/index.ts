@@ -1,7 +1,5 @@
-// src/index.ts
-
 import express from 'express';
-import { Pool } from 'pg'; // PostgreSQL client
+import { Pool } from 'pg';
 import { dbConfig } from './config/environment';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -9,22 +7,28 @@ import morgan from 'morgan';
 import { userRoutes } from './routes/user.route';
 import { productRoutes } from './routes/product.route';
 import { inventoryRoutes } from './routes/inventory.route';
+import { outletRoutes } from './routes/outlet.route';
+import { distributionRoutes } from './routes/distribution.route';
+import { expiredBatchRoutes } from './routes/expiredLog.route';
+import { scheduleExpiredBatchCron } from './cron/expiredLogCron';
 
 const app = express();
 const port = process.env.PORT || 3008;
 
-// Enhanced middleware setup
+let dbPool: Pool;
+
+// Middleware setup
 app.use(helmet()); // Security headers
-app.use(morgan('dev')); // Logging
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev')); // Logging
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-
-let dbPool: Pool;
+app.use(
+  cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 
 // Retry mechanism for database connection
 const createDbConnection = async (): Promise<Pool> => {
@@ -57,11 +61,17 @@ const createDbConnection = async (): Promise<Pool> => {
 };
 
 // Error handling middleware
-const errorHandler = (err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+const errorHandler = (
+  err: Error,
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
   console.error(err.stack);
   res.status(500).json({
     status: 'error',
-    message: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
+    message:
+      process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
   });
 };
 
@@ -71,6 +81,36 @@ const notFoundHandler = (req: express.Request, res: express.Response) => {
     status: 'error',
     message: 'Route not found',
   });
+};
+
+// Graceful shutdown handler
+const setupGracefulShutdown = () => {
+  process.on('SIGINT', async () => {
+    console.log('SIGINT received: closing server and database connection');
+    if (dbPool) {
+      try {
+        await dbPool.end();
+        console.log('Database pool closed');
+      } catch (error) {
+        console.error('Error closing database pool', error);
+      }
+    }
+    process.exit(0);
+  });
+  
+  process.on('SIGTERM', async () => {
+    console.log('SIGTERM received: closing server and database connection');
+    if (dbPool) {
+      try {
+        await dbPool.end();
+        console.log('Database pool closed');
+      } catch (error) {
+        console.error('Error closing database pool', error);
+      }
+    }
+    process.exit(0);
+  });
+  
 };
 
 // Initialize server
@@ -83,11 +123,17 @@ const initializeServer = async () => {
       res.json({ message: 'API is running' });
     });
 
-    // Mount user routes
+    // Schedule cron job (ensure DB pool is initialized)
+    scheduleExpiredBatchCron(dbPool);
+
+    // Mount routes
     app.use('/api/users', userRoutes(dbPool));
     app.use('/api/', productRoutes(dbPool));
+    app.use('/api/', outletRoutes(dbPool));
+    app.use('/api/', distributionRoutes(dbPool));
     app.use('/api/', inventoryRoutes(dbPool));
-
+    app.use('/api/', expiredBatchRoutes(dbPool));
+    
     // Middleware for error handling
     app.use(errorHandler);
 
@@ -113,5 +159,6 @@ process.on('uncaughtException', (error) => {
   process.exit(1);
 });
 
-// Start the server
+// Start the server and setup graceful shutdown
 initializeServer();
+setupGracefulShutdown();

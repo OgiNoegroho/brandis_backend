@@ -11,7 +11,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
 interface AuthenticatedRequest extends Request {
     userId?: string;
     email?: string;
+    peran?: string; // Add `peran` field
 }
+
 
 export const authMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
     const token = req.headers.authorization?.split(' ')[1];
@@ -21,18 +23,22 @@ export const authMiddleware = (req: AuthenticatedRequest, res: Response, next: N
         return;
     }
 
-    jwt.verify(token, JWT_SECRET, (err, decoded) => {
-        if (err) {
-            console.error("Error verifying token:", err);
-            res.status(401).json({ message: "Unauthorized!" });
-            return;
-        }
+    // src/middleware/auth.ts
 
-        if (decoded && typeof decoded === 'object') {
-            req.userId = (decoded as JwtPayload).id;
-            req.email = (decoded as JwtPayload).email;
-        }
+jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) {
+        console.error("Error verifying token:", err);
+        res.status(401).json({ message: "Unauthorized!" });
+        return;
+    }
 
-        next();
-    });
+    if (decoded && typeof decoded === 'object') {
+        req.userId = (decoded as JwtPayload).userId;
+        req.email = (decoded as JwtPayload).email;
+        req.peran = (decoded as JwtPayload).peran; // Include the role (`peran`)
+    }
+
+    next();
+});
+
 };

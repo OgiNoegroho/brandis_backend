@@ -8,15 +8,16 @@ export class UserModel {
 
   async create(user: User): Promise<User> {
     const query = `
-      INSERT INTO brandis.pengguna (nama, email, password, peran) 
-      VALUES ($1, $2, $3, $4)
-      RETURNING id, nama, email, peran
+        INSERT INTO brandis.pengguna (id, nama, email, password, peran)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING id, nama, email, peran;
     `;
-    const values = [user.nama, user.email, user.password, user.peran];
+    const values = [user.id, user.nama, user.email, user.password, user.peran];
     const result = await this.db.query(query, values);
     const newUser = result.rows[0];
     return { ...newUser, id: newUser.id.toString() };
-  }
+}
+
 
   async findAllUsers(): Promise<User[]> {
     const query = 'SELECT id, nama, email, peran FROM brandis.pengguna';

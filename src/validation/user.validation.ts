@@ -5,16 +5,24 @@ import { UserModel } from '../models/user.model';
 
 // Validation schema for creating a user
 export const createUserValidation = Joi.object({
-  nama: Joi.string().min(3).max(100).required(), // `nama` -> `nama`
+  id: Joi.string()
+      .pattern(/^\d{10}$/) // Must be exactly 10 digits
+      .required()
+      .messages({
+          'string.pattern.base': 'ID must be a 10-digit number.',
+          'any.required': 'ID is required.',
+      }),
+  nama: Joi.string().min(3).max(100).required(),
   email: Joi.string().email().required(),
   password: Joi.string()
-    .min(8)
-    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/) // At least one uppercase, lowercase letter, and a number
-    .required(),
+      .min(8)
+      .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+      .required(),
   peran: Joi.string()
-    .valid('Admin Produksi', 'Admin Gudang', 'Bendahara', 'Pemasaran', 'Pimpinan') // `peran` -> `role`
-    .required(), // Role is required and must match one of the possible values
+      .valid('Manajer', 'Bendahara', 'Pemasaran', 'Pimpinan')
+      .required(),
 });
+
 
 // Validation schema for user login
 export const createSessionValidation = Joi.object({
@@ -27,7 +35,7 @@ export const updateUserValidation = Joi.object({
   nama: Joi.string().min(3).max(100), // `nama` -> `nama`
   password: Joi.string().min(8).pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/),
   peran: Joi.string()
-    .valid('Admin Produksi', 'Admin Gudang', 'Bendahara', 'Pemasaran', 'Pimpinan') // `peran` -> `role`
+    .valid('Manajer', 'Bendahara', 'Pemasaran', 'Pimpinan') // `peran` -> `role`
     .optional(),
 }).min(1); // Require at least one field to be updated
 
