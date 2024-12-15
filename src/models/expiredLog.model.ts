@@ -13,7 +13,7 @@ export class ExpiredBatchModel {
           b.nama,
           b.produk_id,
           b.kuantitas,
-          b.tanggal_kadaluarsa  -- Get the original tanggal_kadaluarsa from the batch table
+          b.tanggal_kadaluarsa
         FROM brandis.batch b
         LEFT JOIN brandis.batchKadaluarsa bc ON b.id = bc.batch_id
         LEFT JOIN brandis.batchKadaluarsaLog bcl ON b.id = bcl.batch_id
@@ -28,37 +28,29 @@ export class ExpiredBatchModel {
           nama, 
           produk_id, 
           kuantitas, 
-          tanggal_kadaluarsa  -- Use the original tanggal_kadaluarsa from expired batches
+          tanggal_kadaluarsa
         FROM expired_batches
-        RETURNING batch_id  -- This will return the batch_ids that were inserted into batchKadaluarsa
+        RETURNING batch_id
       ),
       logged_batches AS (
         INSERT INTO brandis.batchKadaluarsaLog (batch_id, expired_on, moved)
         SELECT 
           batch_id, 
-          tanggal_kadaluarsa,  -- Use the original tanggal_kadaluarsa for expired_on
+          tanggal_kadaluarsa,
           TRUE
         FROM expired_batches
-        RETURNING batch_id  -- This will return the batch_ids that were inserted into batchKadaluarsaLog
+        RETURNING batch_id
       )
-      -- Closing the query properly by selecting from logged_batches
-      SELECT * FROM logged_batches;  -- Ensure that the query has a final SELECT statement
+      SELECT * FROM logged_batches;
     `;
   
     const client = await this.db.connect();
-    try {
-      await client.query('BEGIN');  // Start the transaction
-      const result = await client.query(query);
-      console.log('Expired batch move results:', result); // Log the query result
-      await client.query('COMMIT'); // Commit the transaction
-    } catch (error) {
-      await client.query('ROLLBACK'); // Rollback on error
-      console.error('Error moving expired batches:', error);
-      throw error;
-    } finally {
-      client.release();  // Release the client back to the pool
-    }
+    await client.query('BEGIN');  // Start the transaction
+    await client.query(query);
+    await client.query('COMMIT'); // Commit the transaction
+    client.release();  // Release the client back to the pool
   }
+  
 
 // Updated query for getExpiredBatches()
 async getExpiredBatches(): Promise<ExpiredBatchLog[]> {

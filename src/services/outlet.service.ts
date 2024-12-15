@@ -26,4 +26,8 @@ export class OutletService {
     async deleteOutlet(id: number): Promise<void> {
         return this.outletModel.deleteOutlet(id);
     }
+    
+    async getStockOverviewForOutlet(outletId: number) {
+        return this.outletModel.getStockOverviewForOutlet(outletId);
+    }
 }

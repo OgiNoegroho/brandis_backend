@@ -11,7 +11,7 @@ export class DistributionModel {
     status_pembayaran: StatusPembayaran,
     tanggal_faktur: string,
     tanggal_jatuh_tempo: string
-  ) {
+  ) { 
     const client = await this.db.connect();
 
     try {

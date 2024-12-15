@@ -15,11 +15,12 @@ interface CloudinaryStorageWithFolder extends Options {
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
+    folder: 'products' as string, // Override to specify folder
     resource_type: 'auto',
     allowed_formats: ['jpg', 'png', 'jpeg'],
     transformation: [{ width: 500, height: 500, crop: 'limit' }],
-  },
-  folder: 'products' as string, // Override to specify folder
+  }
+  
 } as CloudinaryStorageWithFolder);
 
 export const upload = multer({ storage });
