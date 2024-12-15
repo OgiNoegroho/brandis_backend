@@ -75,16 +75,28 @@ export class OutletController {
         }
     }
     
-    async getStockOverviewForOutlet(req: Request, res: Response, outletId: number) {
-        try {
-            const stockOverview = await this.outletService.getStockOverviewForOutlet(outletId);
-            res.status(200).json(stockOverview);
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                res.status(500).json({ message: error.message });
-            } else {
-                res.status(500).json({ message: 'An unknown error occurred' });
-            }
+    // Controller: outletController.ts
+async getStockOverview(req: Request, res: Response): Promise<void> {
+    try {
+        const { id } = req.params; // Extract outlet ID from the route params
+        const outletId = parseInt(id, 10);
+
+        if (isNaN(outletId)) {
+            res.status(400).json({ message: 'Invalid outlet ID' });
+            return;
+        }
+
+        // Call service to fetch the stock overview
+        const stockOverview = await this.outletService.getStockOverview(outletId);
+
+        res.status(200).json(stockOverview);
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            res.status(500).json({ message: error.message });
+        } else {
+            res.status(500).json({ message: 'An unknown error occurred' });
         }
     }
+}
+
 }

@@ -26,11 +26,11 @@ export const outletRoutes = (dbPool: Pool): Router => {
 
   router.delete('/outlet/:id', authMiddleware, (req, res) => outletController.deleteOutlet(req, res));
 
-    // New route for stock overview
-    router.get('/outlet/:id/stock-overview', authMiddleware, (req, res) => {
-      const { id } = req.params;
-      outletController.getStockOverviewForOutlet(req, res, parseInt(id));
-    });
+    // Route: routes.ts
+router.get('/outlet/:id/stock-overview', authMiddleware, (req, res) => {
+  outletController.getStockOverview(req, res);
+});
+
 
   return router;
 };

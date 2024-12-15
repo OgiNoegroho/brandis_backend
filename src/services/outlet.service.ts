@@ -27,7 +27,10 @@ export class OutletService {
         return this.outletModel.deleteOutlet(id);
     }
     
-    async getStockOverviewForOutlet(outletId: number) {
-        return this.outletModel.getStockOverviewForOutlet(outletId);
-    }
+    // Service: outletService.ts
+async getStockOverview(outletId: number): Promise<any[]> {
+    // Call the model method to fetch the stock overview
+    return this.outletModel.getStockOverview(outletId);
+}
+
 }
