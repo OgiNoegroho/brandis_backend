@@ -23,10 +23,10 @@ export const dbConfig = {
   password: password,
   database: database,
   port: port,
-  connectionTimeoutMillis: 30000, // Increased timeout duration
-  idleTimeoutMillis: 300000, // Idle timeout for connections
-  max: 10, // Max connections in pool
-  min: 2, // Min connections in pool
+  connectionTimeoutMillis: 10800000, // 3 hours in milliseconds (3 * 60 * 60 * 1000)
+  idleTimeoutMillis: 3600000, // 1 hour in milliseconds (1 * 60 * 60 * 1000)
+  max: 5, // Max connections in pool
+  min: 0, // No minimum connections
 };
 
 export const createDbConnection = async (): Promise<Pool> => {
@@ -51,4 +51,3 @@ export const createDbConnection = async (): Promise<Pool> => {
 
   return pool;
 };
-
