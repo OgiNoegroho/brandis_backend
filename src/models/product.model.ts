@@ -9,11 +9,11 @@ export class ProductModel {
   // Add a new product
   async createProduct(productData: ProductDTO): Promise<Product> {
     const query = `
-      INSERT INTO brandis.produk (nama, kategori, komposisi, deskripsi, harga)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING id, nama, kategori, komposisi, deskripsi, harga;
+      INSERT INTO brandis.produk (nama, komposisi, deskripsi, harga)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id, nama, komposisi, deskripsi, harga;
     `;
-    const values = [productData.nama, productData.kategori, productData.komposisi, productData.deskripsi, productData.harga];
+    const values = [productData.nama, productData.komposisi, productData.deskripsi, productData.harga];
     const result: QueryResult = await this.db.query(query, values);
     return result.rows[0];
   }
@@ -32,8 +32,7 @@ export class ProductModel {
     const query = `
       SELECT 
         p.id, 
-        p.nama, 
-        p.kategori, 
+        p.nama,
         p.komposisi, 
         p.deskripsi, 
         p.harga,
@@ -61,8 +60,7 @@ export class ProductModel {
     const query = `
       SELECT 
         p.id, 
-        p.nama, 
-        p.kategori, 
+        p.nama,
         p.komposisi, 
         p.deskripsi, 
         p.harga,
@@ -90,11 +88,11 @@ export class ProductModel {
   async updateProduct(id: string, productData: ProductDTO): Promise<boolean> {
     const query = `
       UPDATE brandis.produk
-      SET nama = $1, kategori = $2, komposisi = $3, deskripsi = $4, harga = $5
-      WHERE id = $6
+      SET nama = $1, komposisi = $2, deskripsi = $3, harga = $4
+      WHERE id = $5
       RETURNING id;
     `;
-    const values = [productData.nama, productData.kategori, productData.komposisi, productData.deskripsi, productData.harga, id];
+    const values = [productData.nama, productData.komposisi, productData.deskripsi, productData.harga, id];
     const result: QueryResult = await this.db.query(query, values);
     return result.rows.length > 0;
   }

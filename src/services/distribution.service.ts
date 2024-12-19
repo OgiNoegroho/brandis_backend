@@ -36,6 +36,8 @@ export class DistributionService {
   async createFaktur(faktur: FakturDistribusi) {
     return this.distributionModel.createFaktur(faktur);
   }
+
+  
   async getAllDistribusi(outlet_id: number) {
     return this.distributionModel.getAllDistribusi(outlet_id);
   }

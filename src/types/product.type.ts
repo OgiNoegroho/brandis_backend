@@ -3,7 +3,6 @@
 export interface Product {
   id: number;
   nama: string;
-  kategori?: string;
   komposisi?: string;
   deskripsi?: string;
   harga: number;
@@ -22,7 +21,6 @@ export interface ProductWithImages extends Product {
 
 export interface ProductDTO {
   nama: string;
-  kategori?: string;
   komposisi?: string;
   deskripsi?: string;
   harga: number;

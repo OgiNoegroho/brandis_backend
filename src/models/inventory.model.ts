@@ -1,6 +1,6 @@
 // InventoryModel.ts
-import { Pool, QueryResult } from 'pg';
-import { BatchDetails, Inventory, InventoryDTO } from '../types/inventory.type';
+import { Pool, QueryResult } from "pg";
+import { BatchDetails, Inventory, InventoryDTO } from "../types/inventory.type";
 
 export class InventoryModel {
   constructor(private dbPool: Pool) {}
@@ -32,9 +32,7 @@ export class InventoryModel {
     const result: QueryResult = await this.dbPool.query(query);
     return result.rows;
   }
-  
-  
-  
+
   async getAllBatches(): Promise<BatchDetails[]> {
     const query = `
       SELECT 
@@ -52,11 +50,10 @@ export class InventoryModel {
     const result: QueryResult = await this.dbPool.query(query);
     return result.rows;
   }
-  
 
   async getInventoryDetail(produkId: string): Promise<BatchDetails[]> {
     const query = `
-     SELECT  
+SELECT  
     b.id AS batch_id,
     b.nama AS nama_batch,
     p.nama AS nama_produk,
@@ -67,16 +64,12 @@ FROM brandis.batch b
 JOIN brandis.produk p ON b.produk_id = p.id  -- Join to get the product name
 WHERE b.produk_id = $1
   AND b.tanggal_kadaluarsa >= CURRENT_DATE  -- Exclude expired batches
-ORDER BY b.dibuat_pada DESC;  -- Optional: Sort by created date in descending order
+ORDER BY b.tanggal_kadaluarsa ASC;  -- Order by expiration date in ascending order (earliest first)
 
     `;
     const result: QueryResult = await this.dbPool.query(query, [produkId]);
     return result.rows;
   }
-  
-  
-
-
 
   async getBatchDetails(batchId: string): Promise<BatchDetails[]> {
     const query = `
@@ -97,38 +90,68 @@ ORDER BY b.dibuat_pada DESC;  -- Optional: Sort by created date in descending or
     const result: QueryResult = await this.dbPool.query(query, [batchId]);
     return result.rows;
   }
-  
 
   async createBatch(batchData: InventoryDTO): Promise<BatchDetails> {
+    // Step 1: Get today's date in D/M/YYYY format
+    const today = new Date();
+    const formattedDate = `${today.getDate()}/${
+      today.getMonth() + 1
+    }/${today.getFullYear()}`; // D/M/YYYY
+
+    // Step 2: Count existing batches created today to generate the sequence number
+    const countQuery = `
+    SELECT COUNT(*) AS batch_count
+    FROM brandis.batch
+    WHERE dibuat_pada::date = CURRENT_DATE
+  `;
+
+    const countResult = await this.dbPool.query(countQuery);
+    const batchCount = parseInt(countResult.rows[0].batch_count, 10) + 1; // Increment count for the new batch
+
+    // Step 3: Generate the nama batch
+    const sequenceNumber = batchCount.toString().padStart(3, "0"); // Pad sequence to 3 digits
+    const namaBatch = `${formattedDate}-${sequenceNumber}`; // Combine date and sequence number
+
+    // Step 4: Insert the batch into the database
     const query = `
-      INSERT INTO brandis.batch (nama, produk_id, kuantitas, tanggal_kadaluarsa, dibuat_pada, diperbarui_pada)
-      VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      RETURNING id AS batch_id, nama AS nama_batch, kuantitas AS kuantitas_batch, 
-                tanggal_kadaluarsa, dibuat_pada, diperbarui_pada, produk_id
-    `;
-    const { nama, produk_id, kuantitas, tanggal_kadaluarsa } = batchData;
+    INSERT INTO brandis.batch (nama, produk_id, kuantitas, tanggal_kadaluarsa, dibuat_pada, diperbarui_pada)
+    VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    RETURNING id AS batch_id, nama AS nama_batch, kuantitas AS kuantitas_batch, 
+              tanggal_kadaluarsa, dibuat_pada, diperbarui_pada, produk_id
+  `;
+
+    const { produk_id, kuantitas, tanggal_kadaluarsa } = batchData;
     const result: QueryResult = await this.dbPool.query(query, [
-      nama,
+      namaBatch, // Use the generated batch name
       produk_id,
       kuantitas,
       tanggal_kadaluarsa,
     ]);
-  
+
     const batch = result.rows[0];
 
-    // Retrieve the product name for the created batch
+    // Step 5: Retrieve the product name for the created batch
     const productQuery = `
-      SELECT nama FROM brandis.produk WHERE id = $1
-    `;
-    const productResult = await this.dbPool.query(productQuery, [batch.produk_id]);
+    SELECT nama FROM brandis.produk WHERE id = $1
+  `;
+    const productResult = await this.dbPool.query(productQuery, [
+      batch.produk_id,
+    ]);
 
-    return { ...batch, nama_produk: productResult.rows[0]?.nama || 'Unknown Product' };
+    // Step 6: Return the batch details
+    return {
+      ...batch,
+      nama_produk: productResult.rows[0]?.nama || "Unknown Product",
+    };
   }
 
-  async updateBatch(batchId: string, batchData: Partial<InventoryDTO>): Promise<BatchDetails> {
+  async updateBatch(
+    batchId: string,
+    batchData: Partial<InventoryDTO>
+  ): Promise<BatchDetails> {
     const fields = Object.keys(batchData)
       .map((key, index) => `${key} = $${index + 2}`)
-      .join(', ');
+      .join(", ");
 
     const query = `
       UPDATE brandis.batch
@@ -137,7 +160,7 @@ ORDER BY b.dibuat_pada DESC;  -- Optional: Sort by created date in descending or
       RETURNING id AS batch_id, nama AS nama_batch, kuantitas AS kuantitas_batch, 
                 tanggal_kadaluarsa, dibuat_pada, diperbarui_pada, produk_id
     `;
-    
+
     const values = [batchId, ...Object.values(batchData)];
     const result: QueryResult = await this.dbPool.query(query, values);
 
@@ -146,9 +169,14 @@ ORDER BY b.dibuat_pada DESC;  -- Optional: Sort by created date in descending or
     const productQuery = `
       SELECT nama FROM brandis.produk WHERE id = $1
     `;
-    const productResult = await this.dbPool.query(productQuery, [updatedBatch.produk_id]);
+    const productResult = await this.dbPool.query(productQuery, [
+      updatedBatch.produk_id,
+    ]);
 
-    return { ...updatedBatch, nama_produk: productResult.rows[0]?.nama || 'Unknown Product' };
+    return {
+      ...updatedBatch,
+      nama_produk: productResult.rows[0]?.nama || "Unknown Product",
+    };
   }
 
   async deleteBatch(batchId: string): Promise<void> {
