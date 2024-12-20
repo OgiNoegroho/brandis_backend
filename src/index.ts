@@ -10,6 +10,7 @@ import { inventoryRoutes } from './routes/inventory.route';
 import { outletRoutes } from './routes/outlet.route';
 import { distributionRoutes } from './routes/distribution.route';
 import { returnRoutes } from './routes/return.route';
+import { salesRoutes } from "./routes/sales.route";
 import { expiredBatchRoutes } from './routes/expiredLog.route';
 import { scheduleExpiredBatchCron } from './cron/expiredLogCron';
 
@@ -134,6 +135,7 @@ const initializeServer = async () => {
     app.use('/api/', distributionRoutes(dbPool));
     app.use('/api/', inventoryRoutes(dbPool));
     app.use('/api/', returnRoutes(dbPool));
+    app.use("/api/", salesRoutes(dbPool));
     app.use('/api/', expiredBatchRoutes(dbPool));
     
     // Middleware for error handling

@@ -1,5 +1,12 @@
-import { DistributionModel } from '../models/distribution.model';
-import { Distribusi, DetailDistribusi, FakturDistribusi, StatusPembayaran } from '../types/distribution.type';
+// src/routes/distribution.service.ts
+
+import { DistributionModel } from "../models/distribution.model";
+import {
+  Distribusi,
+  DetailDistribusi,
+  FakturDistribusi,
+  StatusPembayaran,
+} from "../types/distribution.type";
 
 export class DistributionService {
   constructor(private distributionModel: DistributionModel) {}
@@ -14,11 +21,11 @@ export class DistributionService {
   ) {
     // Validate input
     if (!distribution.outlet_id) {
-      throw new Error('Outlet ID is required');
+      throw new Error("Outlet ID is required");
     }
 
     if (!details || details.length === 0) {
-      throw new Error('Distribution must have at least one detail');
+      throw new Error("Distribution must have at least one detail");
     }
 
     // Call the model to handle the transaction for both Distribusi and Faktur
@@ -37,7 +44,6 @@ export class DistributionService {
     return this.distributionModel.createFaktur(faktur);
   }
 
-  
   async getAllDistribusi(outlet_id: number) {
     return this.distributionModel.getAllDistribusi(outlet_id);
   }

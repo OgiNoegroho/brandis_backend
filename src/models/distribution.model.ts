@@ -1,5 +1,12 @@
-import { Pool } from 'pg';
-import { Distribusi, DetailDistribusi, FakturDistribusi, StatusPembayaran } from '../types/distribution.type';
+// src/routes/distribution.model.ts
+
+import { Pool } from "pg";
+import {
+  Distribusi,
+  DetailDistribusi,
+  FakturDistribusi,
+  StatusPembayaran,
+} from "../types/distribution.type";
 
 export class DistributionModel {
   constructor(private db: Pool) {}

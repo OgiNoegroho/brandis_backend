@@ -1,7 +1,9 @@
+// src/routes/distribution.type.ts
+
 export enum StatusPembayaran {
-  LUNAS = 'Lunas',
-  MENUNGGU = 'Menunggu',
-  JATUH_TEMPO = 'Jatuh Tempo'
+  LUNAS = "Lunas",
+  MENUNGGU = "Menunggu",
+  JATUH_TEMPO = "Jatuh Tempo",
 }
 
 export interface Distribusi {
@@ -37,9 +39,9 @@ export interface CreateDistributionRequestBody {
   outlet_id: number;
   faktur_id: string;
   status_pembayaran: StatusPembayaran;
-  tanggal_faktur: string;  // Can be converted to Date in your controller
-  tanggal_jatuh_tempo: string;  // Can be converted to Date in your controller
-  details: { 
+  tanggal_faktur: string; // Can be converted to Date in your controller
+  tanggal_jatuh_tempo: string; // Can be converted to Date in your controller
+  details: {
     batch_id: number;
     kuantitas_terjual: number;
   }[];
