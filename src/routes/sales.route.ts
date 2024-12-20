@@ -12,7 +12,6 @@ export const salesRoutes = (dbPool: Pool): Router => {
   const salesService = new SalesService(salesModel);
   const salesController = new SalesController(salesService);
 
-
   router.get("/sales/:outlet_id", authMiddleware, (req, res) =>
     salesController.getSalesByOutlet(req, res)
   );

@@ -1,7 +1,6 @@
 import { SalesModel } from "../models/sales.model";
 import { SaleDetail } from "../types/sales.type";
 
-
 export class SalesService {
   constructor(private salesModel: SalesModel) {}
 

@@ -26,46 +26,90 @@ export class SalesModel {
 
   async createSale(outlet_id: number, saleDetails: SaleDetail[]) {
     const client = await this.db.connect();
+    const saleResponses = [];
+
     try {
       await client.query("BEGIN");
 
+      // Step 1: Insert the sale record
       const insertSaleQuery = `
         INSERT INTO brandis.penjualan (outlet_id) 
         VALUES ($1) 
-        RETURNING id
+        RETURNING id;
       `;
       const saleResult = await client.query(insertSaleQuery, [outlet_id]);
       const saleId = saleResult.rows[0].id;
 
       for (const detail of saleDetails) {
-        const { batch_id, kuantitas_terjual } = detail;
+        const { product_id, kuantitas_terjual } = detail;
 
-        // Insert sale detail
-        const insertDetailQuery = `
-          INSERT INTO brandis.detail_penjualan (penjualan_id, batch_id, kuantitas_terjual) 
-          VALUES ($1, $2, $3)
+        // Step 2: Find the batch with the nearest expiration date and sufficient stock
+        const batchQuery = `
+          SELECT id, kuantitas
+          FROM brandis.batch
+          WHERE produk_id = $1
+          AND kuantitas >= $2
+          ORDER BY tanggal_kadaluarsa ASC
+          LIMIT 1
+          FOR UPDATE;
         `;
-        await client.query(insertDetailQuery, [
-          saleId,
-          batch_id,
+        const batchResult = await client.query(batchQuery, [
+          product_id,
           kuantitas_terjual,
         ]);
 
-        // Reduce stock in the outlet
+        if (batchResult.rows.length === 0) {
+          throw new Error(`Not enough stock for product ID ${product_id}.`);
+        }
+
+        const batch = batchResult.rows[0];
+
+        // Step 3: Insert sale details
+        const insertDetailQuery = `
+          INSERT INTO brandis.detail_penjualan (penjualan_id, batch_id, kuantitas_terjual) 
+          VALUES ($1, $2, $3);
+        `;
+        await client.query(insertDetailQuery, [
+          saleId,
+          batch.id,
+          kuantitas_terjual,
+        ]);
+
+        // Step 4: Update outlet stock
         const updateStockQuery = `
           UPDATE brandis.stok_outlet
           SET kuantitas = kuantitas - $1
           WHERE outlet_id = $2 AND batch_id = $3
+          RETURNING kuantitas;
         `;
-        await client.query(updateStockQuery, [
+        const stockUpdateResult = await client.query(updateStockQuery, [
           kuantitas_terjual,
           outlet_id,
-          batch_id,
+          batch.id,
         ]);
+
+        if (stockUpdateResult.rows.length === 0) {
+          throw new Error(`Outlet stock not found for batch ID ${batch.id}.`);
+        }
+
+        // Step 5: Update batch stock
+        const updateBatchQuery = `
+          UPDATE brandis.batch
+          SET kuantitas = kuantitas - $1
+          WHERE id = $2;
+        `;
+        await client.query(updateBatchQuery, [kuantitas_terjual, batch.id]);
+
+        // Collect sale response
+        saleResponses.push({
+          product_id,
+          batch_id: batch.id,
+          quantity_sold: kuantitas_terjual,
+        });
       }
 
       await client.query("COMMIT");
-      return { saleId, saleDetails };
+      return { saleId, saleDetails: saleResponses };
     } catch (error) {
       await client.query("ROLLBACK");
       throw error;
@@ -90,4 +134,3 @@ export class SalesModel {
     return result.rows;
   }
 }
-

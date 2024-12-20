@@ -1,6 +1,5 @@
 export interface SaleDetail {
-  batch_id: number;
+  product_id: number; // Product ID instead of batch_id
   kuantitas_terjual: number;
-  price: number; // Assuming you also have a price field in the sale details
+  price: number; // Assuming the price is part of the sale details
 }
-

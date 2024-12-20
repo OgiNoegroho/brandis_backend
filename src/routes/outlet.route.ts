@@ -9,28 +9,45 @@ import { authMiddleware } from '../middleware/auth';
 
 export const outletRoutes = (dbPool: Pool): Router => {
   const router = Router();
-  
+
   // Create instances of the necessary classes
   const outletModel = new OutletModel(dbPool);
   const outletService = new OutletService(outletModel);
   const outletController = new OutletController(outletService);
 
   // Define the routes with authentication middleware where necessary
-  router.get('/outlet', (req, res) => outletController.getAllOutlets(req, res));
+  router.get("/outlet", (req, res) => outletController.getAllOutlets(req, res));
 
-  router.get('/outlet/:id', (req, res) => outletController.getOutletById(req, res));
+  router.get("/outlet/:id", (req, res) =>
+    outletController.getOutletById(req, res)
+  );
 
-  router.post('/outlet', authMiddleware, (req, res) => outletController.addOutlet(req, res));
+  router.post("/outlet", authMiddleware, (req, res) =>
+    outletController.addOutlet(req, res)
+  );
 
-  router.put('/outlet/:id', authMiddleware, (req, res) => outletController.editOutlet(req, res));
+  router.put("/outlet/:id", authMiddleware, (req, res) =>
+    outletController.editOutlet(req, res)
+  );
 
-  router.delete('/outlet/:id', authMiddleware, (req, res) => outletController.deleteOutlet(req, res));
+  router.delete("/outlet/:id", authMiddleware, (req, res) =>
+    outletController.deleteOutlet(req, res)
+  );
 
-    // Route: routes.ts
-router.get('/outlet/:id/stock-overview', authMiddleware, (req, res) => {
-  outletController.getStockOverview(req, res);
-});
+  // Route: routes.ts
+  router.get("/outlet/:id/stock-overview", authMiddleware, (req, res) => {
+    outletController.getStockOverview(req, res);
+  });
 
+  // src/routes/product.model.ts
+
+  router.get(
+    "/outlet/:id/stock-overview-without-price",
+    authMiddleware,
+    (req, res) => {
+      outletController.getStockOverviewWithoutPrice(req, res);
+    }
+  );
 
   return router;
 };

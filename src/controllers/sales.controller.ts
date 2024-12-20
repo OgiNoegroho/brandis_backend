@@ -16,7 +16,7 @@ export class SalesController {
 
   async createSale(req: Request, res: Response): Promise<void> {
     try {
-      const { outlet_id, saleDetails } = req.body; // saleDetails: [{ batch_id, kuantitas_terjual }]
+      const { outlet_id, saleDetails } = req.body; // saleDetails: [{ product_id, kuantitas_terjual, price }]
       const sale = await this.salesService.createSale(
         Number(outlet_id),
         saleDetails
@@ -37,4 +37,3 @@ export class SalesController {
     }
   }
 }
-
