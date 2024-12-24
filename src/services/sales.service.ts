@@ -11,8 +11,4 @@ export class SalesService {
   async createSale(outlet_id: number, saleDetails: SaleDetail[]) {
     return this.salesModel.createSale(outlet_id, saleDetails);
   }
-
-  async getOutletStock(outlet_id: number) {
-    return this.salesModel.getOutletStock(outlet_id);
-  }
 }

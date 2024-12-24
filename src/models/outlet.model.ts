@@ -69,12 +69,12 @@ WHERE
     so.outlet_id = $1                -- Filter by outlet ID
 GROUP BY 
     p.id, p.nama, p.harga
+HAVING 
+    SUM(so.kuantitas) > 0           -- Only include products with non-zero stock
     `;
     const result = await this.db.query(query, [outletId]);
     return result.rows; // Return the rows from the query
   }
-
-  // src/models/outlet.model.ts
 
   async getStockOverviewWithoutPrice(outletId: number): Promise<any[]> {
     const query = `
@@ -92,6 +92,8 @@ WHERE
     so.outlet_id = $1                -- Filter by outlet ID
 GROUP BY 
     p.id, p.nama
+HAVING 
+    SUM(so.kuantitas) > 0           -- Only include products with non-zero stock
     `;
     const result = await this.db.query(query, [outletId]);
     return result.rows; // Return the rows from the query

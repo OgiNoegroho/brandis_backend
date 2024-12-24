@@ -202,9 +202,9 @@ export class DistributionModel {
       o.nama AS outlet_name,
       o.alamat AS outlet_address,
       p.nama AS product_name,
-      dd.kuantitas_terjual AS quantity,
+      SUM(dd.kuantitas_terjual) AS total_quantity,
       p.harga AS unit_price,
-      (dd.kuantitas_terjual * p.harga) AS total_price,
+      SUM(dd.kuantitas_terjual * p.harga) AS total_price,
       f.jumlah_tagihan AS grand_total,
       f.jumlah_dibayar AS amount_paid,
       (f.jumlah_tagihan - f.jumlah_dibayar) AS balance_due,
@@ -223,6 +223,9 @@ export class DistributionModel {
       brandis.outlet o ON d.outlet_id = o.id
     WHERE 
       f.distribusi_id = $1
+    GROUP BY 
+      f.id, f.tanggal_faktur, f.tanggal_jatuh_tempo, o.nama, o.alamat, p.nama, p.harga, 
+      f.jumlah_tagihan, f.jumlah_dibayar, f.status_pembayaran
     ORDER BY 
       p.nama
   `;

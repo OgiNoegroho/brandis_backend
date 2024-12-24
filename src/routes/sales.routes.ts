@@ -20,9 +20,5 @@ export const salesRoutes = (dbPool: Pool): Router => {
     salesController.createSale(req, res)
   );
 
-  router.get("/stock/:outlet_id", authMiddleware, (req, res) =>
-    salesController.getOutletStock(req, res)
-  );
-
   return router;
 };
