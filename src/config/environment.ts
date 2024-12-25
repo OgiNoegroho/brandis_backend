@@ -1,7 +1,5 @@
-// src/config/environment.ts
-
-import { Pool } from 'pg';
-import { config } from 'dotenv';
+import { Pool } from "pg";
+import { config } from "dotenv";
 
 // Load environment variables from .env file
 config();
@@ -14,8 +12,14 @@ const password = process.env.DB_PASSWORD;
 
 // Validate environment variables
 if (!hostname || !database || !username || !password) {
-  throw new Error('Missing required environment variables for database configuration');
+  throw new Error(
+    "Missing required environment variables for database configuration"
+  );
 }
+
+const maxConnections = process.env.DB_MAX_CONNECTIONS
+  ? parseInt(process.env.DB_MAX_CONNECTIONS)
+  : 10; // Default to 10
 
 export const dbConfig = {
   host: hostname,
@@ -23,29 +27,55 @@ export const dbConfig = {
   password: password,
   database: database,
   port: port,
-  connectionTimeoutMillis: 10800000, // 3 hours in milliseconds (3 * 60 * 60 * 1000)
-  idleTimeoutMillis: 3600000, // 1 hour in milliseconds (1 * 60 * 60 * 1000)
-  max: 5, // Max connections in pool
+  connectionTimeoutMillis: process.env.DB_CONNECTION_TIMEOUT
+    ? Number(process.env.DB_CONNECTION_TIMEOUT)
+    : 2000, // 2 seconds, ensure it's a number
+  idleTimeoutMillis: process.env.DB_IDLE_TIMEOUT
+    ? Number(process.env.DB_IDLE_TIMEOUT)
+    : 30000, // 30 seconds, ensure it's a number
+  max: maxConnections, // Max connections in pool
   min: 0, // No minimum connections
 };
 
 export const createDbConnection = async (): Promise<Pool> => {
   const pool = new Pool(dbConfig);
 
-  try {
-    // Attempt to connect to the PostgreSQL database
-    await pool.connect();
-    console.log('Connected to the PostgreSQL database!');
-  } catch (err) {
-    console.error('Database connection error:', err);
-    throw err;
-  }
+  const connectWithRetry = async (retries: number = 5) => {
+    let attempt = 0;
+    while (attempt < retries) {
+      try {
+        await pool.connect();
+        console.log("Connected to the PostgreSQL database!");
+        return;
+      } catch (err) {
+        attempt++;
+        console.error(`Connection attempt ${attempt} failed:`, err);
+        if (attempt === retries) {
+          console.error(
+            "Max retry attempts reached. Could not connect to database."
+          );
+          throw err; // Re-throw the error after retries are exhausted
+        }
+        // Wait for some time before retrying
+        await new Promise((resolve) => setTimeout(resolve, 5000)); // Retry after 5 seconds
+      }
+    }
+  };
 
-  // Gracefully shutdown by closing the connection pool on process termination
-  process.on('SIGINT', async () => {
-    console.log('Shutting down, closing database connection...');
+  await connectWithRetry();
+
+  // Graceful shutdown
+  process.on("SIGINT", async () => {
+    console.log("Shutting down, closing database connection...");
     await pool.end(); // Close all connections in the pool
-    console.log('Database connection closed');
+    console.log("Database connection closed");
+    process.exit(0);
+  });
+
+  process.on("SIGTERM", async () => {
+    console.log("SIGTERM received, closing database connection...");
+    await pool.end();
+    console.log("Database connection closed");
     process.exit(0);
   });
 
