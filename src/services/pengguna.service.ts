@@ -1,9 +1,9 @@
 // src/services/user.service.ts
 
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { UserModel } from '../models/user.model';
-import { User } from '../types/user.type';
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { UserModel } from "../models/pengguna.model";
+import { User } from "../types/pengguna.type";
 
 export class UserService {
   constructor(private userModel: UserModel) {}
@@ -12,7 +12,7 @@ export class UserService {
   async createUser(user: User): Promise<User> {
     const existingUser = await this.userModel.getUserByEmail(user.email);
     if (existingUser) {
-        throw new Error('Email is already taken');
+      throw new Error("Email is already taken");
     }
 
     // Hash the password before saving to the database
@@ -21,32 +21,28 @@ export class UserService {
 
     // Pass the user object to the database method
     return await this.userModel.create(userWithHashedPassword);
-}
-
-
-  // src/services/user.service.ts
-
-// User login logic
-async login(email: string, password: string): Promise<string> {
-  const user = await this.userModel.getUserByEmail(email);
-  if (!user) {
-      throw new Error('User not found');
   }
 
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
-      throw new Error('Invalid password');
-  }
+  // User login logic
+  async login(email: string, password: string): Promise<string> {
+    const user = await this.userModel.getUserByEmail(email);
+    if (!user) {
+      throw new Error("User not found");
+    }
 
-  // Create and return a JWT token
-  const token = jwt.sign(
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new Error("Invalid password");
+    }
+
+    // Create and return a JWT token
+    const token = jwt.sign(
       { userId: user.id, peran: user.peran, email: user.email }, // Include role (`peran`) in the token payload
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '1h' }
-  );
-  return token;
-}
-
+      process.env.JWT_SECRET || "your-secret-key",
+      { expiresIn: "1h" }
+    );
+    return token;
+  }
 
   // Retrieve all users
   async getAllUsers(): Promise<User[]> {
@@ -59,7 +55,10 @@ async login(email: string, password: string): Promise<string> {
   }
 
   // Update user data by email
-  async updateUser(email: string, userUpdates: Partial<User>): Promise<User | null> {
+  async updateUser(
+    email: string,
+    userUpdates: Partial<User>
+  ): Promise<User | null> {
     return await this.userModel.updateUser(email, userUpdates);
   }
 

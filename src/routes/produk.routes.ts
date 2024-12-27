@@ -1,12 +1,12 @@
 // src/routes/product.model.ts
 
-import { Router } from 'express';
-import { Pool } from 'pg';
-import { ProductModel } from '../models/product.model';
-import { ProductService } from '../services/product.service';
-import { ProductController } from '../controllers/product.controller';
-import { authMiddleware } from '../middleware/auth';
-import { upload } from '../middleware/upload.middleware';
+import { Router } from "express";
+import { Pool } from "pg";
+import { ProductModel } from "../models/produk.model";
+import { ProductService } from "../services/produk.service";
+import { ProductController } from "../controllers/produk.controller";
+import { authMiddleware } from "../middleware/auth";
+import { upload } from "../middleware/upload.middleware";
 
 export const productRoutes = (dbPool: Pool): Router => {
   const router = Router();
@@ -53,7 +53,6 @@ export const productRoutes = (dbPool: Pool): Router => {
     upload.single("image"),
     productController.replaceProductImage
   );
-
 
   return router;
 };

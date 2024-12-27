@@ -1,10 +1,10 @@
 // src/models/product.model.ts
 
-import { Pool, QueryResult } from 'pg';
-import { Product, ProductDTO, ProductWithImages } from '../types/product.type';
+import { Pool, QueryResult } from "pg";
+import { Product, ProductDTO, ProductWithImages } from "../types/produk.type";
 
 export class ProductModel {
-  constructor(private db: Pool) { }
+  constructor(private db: Pool) {}
 
   // Add a new product
   async createProduct(productData: ProductDTO): Promise<Product> {
@@ -138,30 +138,38 @@ export class ProductModel {
 
   // src/models/product.model.ts
 
-  async replaceProductImage(productId: string, newImage: { url: string, publicId: string }): Promise<void> {
+  async replaceProductImage(
+    productId: string,
+    newImage: { url: string; publicId: string }
+  ): Promise<void> {
     const client = await this.db.connect(); // Start a transaction
-  
+
     try {
       // Start a transaction
-      await client.query('BEGIN');
-    
+      await client.query("BEGIN");
+
       // 1. Delete the existing images
-      const deleteQuery = 'DELETE FROM brandis.gambar_produk WHERE produk_id = $1';
+      const deleteQuery =
+        "DELETE FROM brandis.gambar_produk WHERE produk_id = $1";
       await client.query(deleteQuery, [productId]);
-    
+
       // 2. Insert the new image
       const insertQuery = `
       INSERT INTO brandis.gambar_produk (produk_id, url, public_id)
       VALUES ($1, $2, $3)
     `;
-      await client.query(insertQuery, [productId, newImage.url, newImage.publicId]);
-    
+      await client.query(insertQuery, [
+        productId,
+        newImage.url,
+        newImage.publicId,
+      ]);
+
       // Commit the transaction
-      await client.query('COMMIT');
+      await client.query("COMMIT");
     } catch (error) {
       // Rollback in case of error
-      await client.query('ROLLBACK');
-      throw new Error('Failed to replace product image');
+      await client.query("ROLLBACK");
+      throw new Error("Failed to replace product image");
     } finally {
       client.release();
     }

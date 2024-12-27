@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { Pool } from 'pg';
-import { ExpiredBatchController } from '../controllers/expiredLog.controller';
+import { ExpiredBatchController } from '../controllers/kadaluarsa.controller';
 import { authMiddleware } from '../middleware/auth';
 
 export const expiredBatchRoutes = (db: Pool): Router => {

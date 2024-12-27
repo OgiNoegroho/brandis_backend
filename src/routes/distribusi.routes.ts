@@ -1,11 +1,11 @@
 // src/routes/distribution.routes.ts
 
-import { Router } from 'express';
-import { Pool } from 'pg';
-import { DistributionController } from '../controllers/distribution.controller';
-import { DistributionService } from '../services/distribution.service';
-import { DistributionModel } from '../models/distribution.model';
-import { authMiddleware } from '../middleware/auth';
+import { Router } from "express";
+import { Pool } from "pg";
+import { DistributionController } from "../controllers/distribusi.controller";
+import { DistributionService } from "../services/distribusi.service";
+import { DistributionModel } from "../models/distribusi.model";
+import { authMiddleware } from "../middleware/auth";
 
 export const distributionRoutes = (dbPool: Pool): Router => {
   const router = Router();

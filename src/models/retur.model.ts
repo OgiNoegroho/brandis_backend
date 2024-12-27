@@ -1,75 +1,86 @@
-import { Pool } from 'pg';
-import { ReturnDTO, ReturnResult } from '../types/return.type';
+import { Pool } from "pg";
+import { ReturnDTO, ReturnResult } from "../types/retur.type";
 
 export class ReturnModel {
   constructor(private dbPool: Pool) {}
 
- async createReturn(returnDataList: ReturnDTO[]): Promise<ReturnResult[]> {
-  const client = await this.dbPool.connect(); // Get a client for the transaction
-  try {
-    await client.query('BEGIN'); // Start transaction
+  async createReturn(returnDataList: ReturnDTO[]): Promise<ReturnResult[]> {
+    const client = await this.dbPool.connect(); // Get a client for the transaction
+    try {
+      await client.query("BEGIN"); // Start transaction
 
-    const returnResults: ReturnResult[] = [];
+      const returnResults: ReturnResult[] = [];
 
-    for (const returnData of returnDataList) {
-      const { outlet_id, batch_id, kuantitas, alasan } = returnData;
+      for (const returnData of returnDataList) {
+        const { outlet_id, batch_id, kuantitas, alasan } = returnData;
 
-      // Check current stock in stok_outlet
-      const stockQuery = `
+        // Check current stock in stok_outlet
+        const stockQuery = `
         SELECT kuantitas 
         FROM brandis.stok_outlet 
         WHERE outlet_id = $1 AND batch_id = $2
         FOR UPDATE;
       `;
-      const stockResult = await client.query(stockQuery, [outlet_id, batch_id]);
+        const stockResult = await client.query(stockQuery, [
+          outlet_id,
+          batch_id,
+        ]);
 
-      if (stockResult.rowCount === 0) {
-        throw new Error(`No stock available for batch ${batch_id} in outlet ${outlet_id}`);
-      }
+        if (stockResult.rowCount === 0) {
+          throw new Error(
+            `No stock available for batch ${batch_id} in outlet ${outlet_id}`
+          );
+        }
 
-      const currentStock = stockResult.rows[0].kuantitas;
-      if (currentStock < kuantitas) {
-        throw new Error(`Insufficient stock for batch ${batch_id} in outlet ${outlet_id}`);
-      }
+        const currentStock = stockResult.rows[0].kuantitas;
+        if (currentStock < kuantitas) {
+          throw new Error(
+            `Insufficient stock for batch ${batch_id} in outlet ${outlet_id}`
+          );
+        }
 
-      // Decrease stock in stok_outlet
-      const updateStockQuery = `
+        // Decrease stock in stok_outlet
+        const updateStockQuery = `
         UPDATE brandis.stok_outlet 
         SET kuantitas = kuantitas - $1, diperbarui_pada = CURRENT_TIMESTAMP
         WHERE outlet_id = $2 AND batch_id = $3;
       `;
-      await client.query(updateStockQuery, [kuantitas, outlet_id, batch_id]);
+        await client.query(updateStockQuery, [kuantitas, outlet_id, batch_id]);
 
-      // Insert into pengembalian table
-      const returnQuery = `
+        // Insert into pengembalian table
+        const returnQuery = `
         INSERT INTO brandis.pengembalian (outlet_id) 
         VALUES ($1) 
         RETURNING id;
       `;
-      const returnResult = await client.query(returnQuery, [outlet_id]);
-      const returnId = returnResult.rows[0].id;
+        const returnResult = await client.query(returnQuery, [outlet_id]);
+        const returnId = returnResult.rows[0].id;
 
-      // Insert into detail_pengembalian table
-      const detailQuery = `
+        // Insert into detail_pengembalian table
+        const detailQuery = `
         INSERT INTO brandis.detail_pengembalian (pengembalian_id, batch_id, kuantitas, alasan) 
         VALUES ($1, $2, $3, $4);
       `;
-      await client.query(detailQuery, [returnId, batch_id, kuantitas, alasan]);
+        await client.query(detailQuery, [
+          returnId,
+          batch_id,
+          kuantitas,
+          alasan,
+        ]);
 
-      returnResults.push({ return_id: returnId });
+        returnResults.push({ return_id: returnId });
+      }
+
+      await client.query("COMMIT"); // Commit transaction
+
+      return returnResults; // Return all the created returns
+    } catch (error) {
+      await client.query("ROLLBACK"); // Rollback transaction on error
+      throw error;
+    } finally {
+      client.release(); // Release the client
     }
-
-    await client.query('COMMIT'); // Commit transaction
-
-    return returnResults; // Return all the created returns
-  } catch (error) {
-    await client.query('ROLLBACK'); // Rollback transaction on error
-    throw error;
-  } finally {
-    client.release(); // Release the client
   }
-}
-
 
   async getReturnHistory(outletId: number): Promise<any[]> {
     const query = `
@@ -88,14 +99,16 @@ export class ReturnModel {
       WHERE p.outlet_id = $1
       ORDER BY dp.dibuat_pada DESC;
     `;
-  
+
     const result = await this.dbPool.query(query, [outletId]);
     return result.rows;
   }
 
- // New method to get all product details from stock outlet for a specific outlet ID
-async getAllProductDetailsFromStockOutletByOutletId(outletId: number): Promise<any[]> {
-  const query = `
+  // New method to get all product details from stock outlet for a specific outlet ID
+  async getAllProductDetailsFromStockOutletByOutletId(
+    outletId: number
+  ): Promise<any[]> {
+    const query = `
     SELECT 
       pr.id AS product_id,          -- Product ID
       pr.nama AS product_name       -- Product Name
@@ -105,13 +118,10 @@ async getAllProductDetailsFromStockOutletByOutletId(outletId: number): Promise<a
     WHERE so.outlet_id = $1          -- Filter by specific outlet_id
     ORDER BY pr.nama;                -- Optional: Order by product name
   `;
-  
-  const result = await this.dbPool.query(query, [outletId]);
-  return result.rows;
-}
 
-
-
+    const result = await this.dbPool.query(query, [outletId]);
+    return result.rows;
+  }
 
   // New method to get batch details (batch ID, batch name, and quantity)
   async getBatchDetailsByProductId(productId: number): Promise<any[]> {

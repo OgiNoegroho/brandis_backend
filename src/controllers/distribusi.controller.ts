@@ -1,16 +1,16 @@
 // src/routes/distribution.controller.ts
 
 import { Request, Response } from "express";
-import { DistributionService } from "../services/distribution.service";
+import { DistributionService } from "../services/distribusi.service";
 import {
   Distribusi,
   DetailDistribusi,
   CreateDistributionRequestBody,
   StatusPembayaran,
-} from "../types/distribution.type";
+} from "../types/distribusi.type";
 
 export class DistributionController {
-  constructor(private distributionService: DistributionService) { }
+  constructor(private distributionService: DistributionService) {}
 
   async createDistribution(req: Request, res: Response) {
     try {
@@ -23,7 +23,6 @@ export class DistributionController {
         details,
       }: CreateDistributionRequestBody = req.body;
 
-      // Ensure status_pembayaran is a valid value from StatusPembayaran enum
       if (!Object.values(StatusPembayaran).includes(status_pembayaran)) {
         throw new Error("Invalid status_pembayaran");
       }
@@ -37,7 +36,6 @@ export class DistributionController {
         kuantitas_terjual: detail.kuantitas_terjual,
       }));
 
-      // Now, create both the distribution and faktur in a single transaction
       const result =
         await this.distributionService.createDistributionWithFaktur(
           distribution,
@@ -48,7 +46,6 @@ export class DistributionController {
           tanggal_jatuh_tempo
         );
 
-      // Return the result, which will include distribusi_id and faktur_id
       res.status(201).json({
         distribusi_id: result.distribusi_id,
         faktur_id: result.faktur_id,
@@ -62,7 +59,6 @@ export class DistributionController {
     }
   }
 
-  // Fetch all distributions by outlet ID
   async getAllDistribusi(req: Request, res: Response) {
     try {
       const { outlet_id } = req.params;
@@ -81,7 +77,6 @@ export class DistributionController {
     }
   }
 
-  // Fetch distribution details by distribution ID
   async getDistribusiById(req: Request, res: Response) {
     try {
       const { distribusi_id } = req.params;
@@ -99,7 +94,6 @@ export class DistributionController {
     }
   }
 
-  // Fetch invoice details by distribution ID
   async getFakturDistribusi(req: Request, res: Response) {
     try {
       const { distribusi_id } = req.params;
@@ -118,9 +112,8 @@ export class DistributionController {
     }
   }
 
-  // Controller method to handle the update of Faktur status
   async updateFakturStatus(req: Request, res: Response): Promise<void> {
-    const faktur_id = req.params.faktur_id; // Get faktur_id from the route parameter
+    const faktur_id = req.params.faktur_id;
     const { status_pembayaran } = req.body;
 
     if (!faktur_id || !status_pembayaran) {
@@ -159,10 +152,11 @@ export class DistributionController {
     }
 
     try {
-      const updatedFaktur = await this.distributionService.addToFakturAmountPaid(
-        faktur_id,
-        jumlah_dibayar
-      );
+      const updatedFaktur =
+        await this.distributionService.addToFakturAmountPaid(
+          faktur_id,
+          jumlah_dibayar
+        );
       res.status(200).json(updatedFaktur); // Send updated faktur details as response
     } catch (error) {
       console.error("Error adding to jumlah_dibayar:", error);
@@ -174,7 +168,9 @@ export class DistributionController {
           res.status(404).json({ error: "Faktur not found" });
         } else if (error.message.includes("exceeds")) {
           // Handle specific error when the payment exceeds the outstanding balance
-          res.status(400).json({ error: "Payment exceeds the outstanding balance" });
+          res
+            .status(400)
+            .json({ error: "Payment exceeds the outstanding balance" });
         } else {
           // General error
           res.status(500).json({ error: error.message });

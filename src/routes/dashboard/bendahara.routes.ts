@@ -1,3 +1,5 @@
+// //src\routes\dashboard\bendahara.routes.ts
+
 import { Router } from "express";
 import { Pool } from "pg";
 import { BendaharaController } from "../../controllers/dashboard/bendahara.controller";
@@ -21,6 +23,10 @@ export const bendaharaRoutes = (dbPool: Pool): Router => {
 
   router.get("/bendahara/pendapatanBulanIni", authMiddleware, (req, res) =>
     bendaharaController.getPendapatanBulanIni(req, res)
+  );
+
+  router.get("/bendahara/overdueInvoices", authMiddleware, (req, res) =>
+    bendaharaController.getOverdueInvoices(req, res)
   );
 
   router.get("/bendahara/fakturJatuhTempoHariIni", authMiddleware, (req, res) =>

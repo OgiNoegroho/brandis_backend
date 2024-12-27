@@ -1,5 +1,5 @@
 import { Pool } from "pg";
-import { SaleDetail } from "../types/sales.type";
+import { SaleDetail } from "../types/penjualan.type";
 
 export class SalesModel {
   constructor(private db: Pool) {}
@@ -31,7 +31,6 @@ export class SalesModel {
     try {
       await client.query("BEGIN");
 
-      // Step 1: Insert the sale record
       let saleId: number;
       try {
         const insertSaleQuery = `
@@ -51,7 +50,6 @@ export class SalesModel {
         let remainingQuantity = kuantitas_terjual;
         const batchesUsed = [];
 
-        // Step 2: Check if there is enough total stock for the product across all batches in this outlet
         const totalStockQuery = `
                 SELECT SUM(so.kuantitas) AS total_stock
                 FROM brandis.stok_outlet so
@@ -90,15 +88,12 @@ export class SalesModel {
             throw new Error(`Not enough stock for product ID ${product_id}.`);
           }
 
-          // Inside Step 4: Process batches in order of expiration date
           for (const batch of batchResult.rows) {
             if (remainingQuantity <= 0) break;
 
-            // Determine the quantity to take from this batch
             const quantityToTake = Math.min(batch.kuantitas, remainingQuantity);
             remainingQuantity -= quantityToTake;
 
-            // Insert sale details for the current batch
             const insertDetailQuery = `
     INSERT INTO brandis.detail_penjualan (penjualan_id, batch_id, kuantitas_terjual) 
     VALUES ($1, $2, $3);
@@ -109,7 +104,6 @@ export class SalesModel {
               quantityToTake,
             ]);
 
-            // Update outlet stock
             const updateOutletStockQuery = `
     UPDATE brandis.stok_outlet
     SET kuantitas = kuantitas - $1
@@ -121,14 +115,12 @@ export class SalesModel {
               batch.batch_id,
             ]);
 
-            // Record batch usage
             batchesUsed.push({
               batch_id: batch.batch_id,
               quantity_sold: quantityToTake,
             });
           }
 
-          // If we still have remaining quantity, it means not enough stock was available
           if (remainingQuantity > 0) {
             throw new Error(
               `Not enough stock to fulfill the request for product ID ${product_id}. Remaining: ${remainingQuantity}`
@@ -140,18 +132,15 @@ export class SalesModel {
           );
         }
 
-        // Add the sale detail response
         saleResponses.push({
           product_id,
           batches_used: batchesUsed,
         });
       }
 
-      // Commit the transaction
       await client.query("COMMIT");
       return { saleId, saleDetails: saleResponses };
     } catch (error) {
-      // Rollback if there's an error
       await client.query("ROLLBACK");
       console.error(`Transaction failed: ${error}`);
       throw error;

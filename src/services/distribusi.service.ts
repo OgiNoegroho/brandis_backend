@@ -1,12 +1,12 @@
 // src/routes/distribution.service.ts
 
-import { DistributionModel } from "../models/distribution.model";
+import { DistributionModel } from "../models/distribusi.model";
 import {
   Distribusi,
   DetailDistribusi,
   FakturDistribusi,
   StatusPembayaran,
-} from "../types/distribution.type";
+} from "../types/distribusi.type";
 
 export class DistributionService {
   constructor(private distributionModel: DistributionModel) {}
@@ -39,7 +39,6 @@ export class DistributionService {
     );
   }
 
-  // This method handles creating the faktur in the database
   async createFaktur(faktur: FakturDistribusi) {
     return this.distributionModel.createFaktur(faktur);
   }

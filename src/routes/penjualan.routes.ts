@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { Pool } from "pg";
-import { SalesController } from "../controllers/sales.controller";
-import { SalesService } from "../services/sales.service";
-import { SalesModel } from "../models/sales.model";
+import { SalesController } from "../controllers/penjualan.controller";
+import { SalesService } from "../services/penjualan.service";
+import { SalesModel } from "../models/penjualan.model";
 import { authMiddleware } from "../middleware/auth";
 
 export const salesRoutes = (dbPool: Pool): Router => {

@@ -1,5 +1,5 @@
-import { SalesModel } from "../models/sales.model";
-import { SaleDetail } from "../types/sales.type";
+import { SalesModel } from "../models/penjualan.model";
+import { SaleDetail } from "../types/penjualan.type";
 
 export class SalesService {
   constructor(private salesModel: SalesModel) {}

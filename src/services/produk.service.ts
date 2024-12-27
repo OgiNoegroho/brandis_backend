@@ -1,11 +1,11 @@
 // src/service/product.service.ts
 
-import { ProductDTO } from '../types/product.type';
-import { ProductModel } from '../models/product.model';
-import { v2 as cloudinary } from 'cloudinary';
+import { ProductDTO } from "../types/produk.type";
+import { ProductModel } from "../models/produk.model";
+import { v2 as cloudinary } from "cloudinary";
 
 export class ProductService {
-  constructor(private productModel: ProductModel) { }
+  constructor(private productModel: ProductModel) {}
 
   // Add a new product and save its image
   async addProduct(productData: ProductDTO, imageFile?: Express.Multer.File) {
@@ -94,10 +94,9 @@ export class ProductService {
         true // Mark as primary
       );
 
-      // Return the updated product
       return this.getProductById(id);
     } catch (error) {
-      throw new Error('Failed to replace product image: ' + error);
+      throw new Error("Failed to replace product image: " + error);
     }
   }
 }

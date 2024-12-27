@@ -1,5 +1,5 @@
-import { ExpiredBatchModel } from '../models/expiredLog.model';
-import { ExpiredBatchLog } from '../types/expiredLog.type';
+import { ExpiredBatchModel } from "../models/kadaluarsa.model";
+import { ExpiredBatchLog } from "../types/kadaluarsa.type";
 
 export class ExpiredBatchService {
   constructor(private model: ExpiredBatchModel) {}

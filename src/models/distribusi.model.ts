@@ -6,7 +6,7 @@ import {
   DetailDistribusi,
   FakturDistribusi,
   StatusPembayaran,
-} from "../types/distribution.type";
+} from "../types/distribusi.type";
 
 export class DistributionModel {
   constructor(private db: Pool) {}

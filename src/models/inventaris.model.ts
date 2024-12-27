@@ -1,6 +1,10 @@
 // InventoryModel.ts
 import { Pool, QueryResult } from "pg";
-import { BatchDetails, Inventory, InventoryDTO } from "../types/inventory.type";
+import {
+  BatchDetails,
+  Inventory,
+  InventoryDTO,
+} from "../types/inventaris.type";
 
 export class InventoryModel {
   constructor(private dbPool: Pool) {}

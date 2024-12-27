@@ -1,8 +1,8 @@
 // src/controllers/product.controller.ts
 
-import { Request, Response } from 'express';
-import { ProductService } from '../services/product.service';
-import { ProductDTO } from '../types/product.type';
+import { Request, Response } from "express";
+import { ProductService } from "../services/produk.service";
+import { ProductDTO } from "../types/produk.type";
 
 export class ProductController {
   constructor(private productService: ProductService) {}

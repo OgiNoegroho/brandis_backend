@@ -1,6 +1,5 @@
-import { Pool } from 'pg';
-import { ExpiredBatchLog } from '../types/expiredLog.type';
-
+import { Pool } from "pg";
+import { ExpiredBatchLog } from "../types/kadaluarsa.type";
 
 export class ExpiredBatchModel {
   constructor(private db: Pool) {}
@@ -43,18 +42,17 @@ export class ExpiredBatchModel {
       )
       SELECT * FROM logged_batches;
     `;
-  
-    const client = await this.db.connect();
-    await client.query('BEGIN');  // Start the transaction
-    await client.query(query);
-    await client.query('COMMIT'); // Commit the transaction
-    client.release();  // Release the client back to the pool
-  }
-  
 
-// Updated query for getExpiredBatches()
-async getExpiredBatches(): Promise<ExpiredBatchLog[]> {
-  const query = `
+    const client = await this.db.connect();
+    await client.query("BEGIN"); // Start the transaction
+    await client.query(query);
+    await client.query("COMMIT"); // Commit the transaction
+    client.release(); // Release the client back to the pool
+  }
+
+  // Updated query for getExpiredBatches()
+  async getExpiredBatches(): Promise<ExpiredBatchLog[]> {
+    const query = `
     SELECT 
       log.id,
       log.batch_id,
@@ -66,8 +64,7 @@ async getExpiredBatches(): Promise<ExpiredBatchLog[]> {
     ORDER BY log.expired_on DESC;  -- Order by expired_on, not created_at
   `;
 
-  const result = await this.db.query<ExpiredBatchLog>(query);
-  return result.rows;
-}
-
+    const result = await this.db.query<ExpiredBatchLog>(query);
+    return result.rows;
+  }
 }

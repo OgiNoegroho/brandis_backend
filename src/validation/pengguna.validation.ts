@@ -1,28 +1,27 @@
-import Joi from 'joi';
-import { NextFunction, Request, Response } from 'express';
-import { Pool } from 'pg';
-import { UserModel } from '../models/user.model';
+import Joi from "joi";
+import { NextFunction, Request, Response } from "express";
+import { Pool } from "pg";
+import { UserModel } from "../models/pengguna.model";
 
 // Validation schema for creating a user
 export const createUserValidation = Joi.object({
   id: Joi.string()
-      .pattern(/^\d{10}$/) // Must be exactly 10 digits
-      .required()
-      .messages({
-          'string.pattern.base': 'ID must be a 10-digit number.',
-          'any.required': 'ID is required.',
-      }),
+    .pattern(/^\d{10}$/) // Must be exactly 10 digits
+    .required()
+    .messages({
+      "string.pattern.base": "ID must be a 10-digit number.",
+      "any.required": "ID is required.",
+    }),
   nama: Joi.string().min(3).max(100).required(),
   email: Joi.string().email().required(),
   password: Joi.string()
-      .min(8)
-      .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-      .required(),
+    .min(8)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .required(),
   peran: Joi.string()
-      .valid('Manajer', 'Bendahara', 'Pemasaran', 'Pimpinan')
-      .required(),
+    .valid("Manajer", "Bendahara", "Pemasaran", "Pimpinan")
+    .required(),
 });
-
 
 // Validation schema for user login
 export const createSessionValidation = Joi.object({
@@ -33,9 +32,11 @@ export const createSessionValidation = Joi.object({
 // Validation schema for updating a user
 export const updateUserValidation = Joi.object({
   nama: Joi.string().min(3).max(100), // `nama` -> `nama`
-  password: Joi.string().min(8).pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/),
+  password: Joi.string()
+    .min(8)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/),
   peran: Joi.string()
-    .valid('Manajer', 'Bendahara', 'Pemasaran', 'Pimpinan') // `peran` -> `role`
+    .valid("Manajer", "Bendahara", "Pemasaran", "Pimpinan") // `peran` -> `role`
     .optional(),
 }).min(1); // Require at least one field to be updated
 
@@ -46,14 +47,14 @@ export const validate = (validationFn: Joi.ObjectSchema) => {
 
     if (error) {
       const errorMessages = error.details.map((detail) => ({
-        field: detail.path.join('.'),
+        field: detail.path.join("."),
         message: detail.message,
       }));
 
       // Send the response and exit the function
       res.status(400).json({
-        status: 'error',
-        message: 'Validation failed',
+        status: "error",
+        message: "Validation failed",
         errors: errorMessages,
       });
       return; // Early return to prevent further execution
@@ -68,19 +69,25 @@ export const validate = (validationFn: Joi.ObjectSchema) => {
 // Custom validation middleware to check if email exists in the database
 export const validateEmailExists = (dbPool: Pool) => {
   const userModel = new UserModel(dbPool); // Pass dbPool to UserModel
-  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  return async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const email = req.body.email;
       const existingUser = await userModel.getUserByEmail(email);
 
       if (existingUser) {
         res.status(400).json({
-          status: 'error',
-          message: 'Validation failed',
-          errors: [{
-            field: 'email',
-            message: 'Email is already registered',
-          }],
+          status: "error",
+          message: "Validation failed",
+          errors: [
+            {
+              field: "email",
+              message: "Email is already registered",
+            },
+          ],
         });
         return; // Exit function to prevent further execution
       }

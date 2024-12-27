@@ -1,7 +1,7 @@
-import { ExpiredBatchService } from '../services/expiredLog.service';
-import { ExpiredBatchModel } from '../models/expiredLog.model';
-import { Pool } from 'pg';
-import { Request, Response } from 'express';
+import { ExpiredBatchService } from "../services/kadaluarsa.service";
+import { ExpiredBatchModel } from "../models/kadaluarsa.model";
+import { Pool } from "pg";
+import { Request, Response } from "express";
 
 export class ExpiredBatchController {
   constructor(private db: Pool) {}
@@ -15,10 +15,12 @@ export class ExpiredBatchController {
     try {
       const service = this.getService();
       await service.moveExpiredBatches();
-      res.status(200).json({ message: 'Expired batches processed successfully.' });
+      res
+        .status(200)
+        .json({ message: "Expired batches processed successfully." });
     } catch (error) {
-      console.error('Error processing expired batches:', error);
-      res.status(500).json({ message: 'Failed to process expired batches' });
+      console.error("Error processing expired batches:", error);
+      res.status(500).json({ message: "Failed to process expired batches" });
     }
   }
 
@@ -28,8 +30,8 @@ export class ExpiredBatchController {
       const logs = await service.getExpiredBatches();
       res.status(200).json(logs);
     } catch (error) {
-      console.error('Error fetching expired batches:', error);
-      res.status(500).json({ message: 'Failed to fetch expired batches' });
+      console.error("Error fetching expired batches:", error);
+      res.status(500).json({ message: "Failed to fetch expired batches" });
     }
   }
 }

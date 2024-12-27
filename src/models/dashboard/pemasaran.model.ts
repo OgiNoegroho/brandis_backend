@@ -1,3 +1,4 @@
+//src\models\dashboard\pemasaran.model.ts
 import { Pool } from "pg";
 
 export class PemasaranModel {
@@ -45,18 +46,15 @@ ORDER BY stok ASC;
 
   async getOutletTerbaik() {
     const query = `
-      SELECT 
-    o.nama AS outlet_nama, 
-    pr.nama AS produk_nama, 
+    SELECT 
+    o.nama AS outlet_nama,
     SUM(dp.kuantitas_terjual) AS total_terjual
 FROM brandis.detail_penjualan dp
 JOIN brandis.penjualan p ON dp.penjualan_id = p.id
 JOIN brandis.outlet o ON p.outlet_id = o.id
-JOIN brandis.batch b ON dp.batch_id = b.id
-JOIN brandis.produk pr ON b.produk_id = pr.id
-GROUP BY o.nama, pr.nama
+GROUP BY o.nama
 ORDER BY total_terjual DESC
-LIMIT 1;
+LIMIT 3;
 
     `;
     const result = await this.dbPool.query(query);
@@ -65,18 +63,15 @@ LIMIT 1;
 
   async getOutletTerendah() {
     const query = `
-      SELECT 
-    o.nama AS outlet_nama, 
-    pr.nama AS produk_nama, 
+    SELECT 
+    o.nama AS outlet_nama,
     SUM(dp.kuantitas_terjual) AS total_terjual
 FROM brandis.detail_penjualan dp
 JOIN brandis.penjualan p ON dp.penjualan_id = p.id
 JOIN brandis.outlet o ON p.outlet_id = o.id
-JOIN brandis.batch b ON dp.batch_id = b.id
-JOIN brandis.produk pr ON b.produk_id = pr.id
-GROUP BY o.nama, pr.nama
+GROUP BY o.nama
 ORDER BY total_terjual ASC
-LIMIT 1;
+LIMIT 3;
 
     `;
     const result = await this.dbPool.query(query);

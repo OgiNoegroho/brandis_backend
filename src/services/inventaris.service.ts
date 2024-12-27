@@ -1,5 +1,5 @@
-import { InventoryDTO } from '../types/inventory.type';
-import { InventoryModel } from '../models/inventory.model';
+import { InventoryDTO } from "../types/inventaris.type";
+import { InventoryModel } from "../models/inventaris.model";
 
 export class InventoryService {
   constructor(private inventoryModel: InventoryModel) {}
@@ -8,7 +8,6 @@ export class InventoryService {
     return this.inventoryModel.getInventory();
   }
 
-  
   getAllBatches() {
     return this.inventoryModel.getAllBatches();
   }
@@ -16,10 +15,9 @@ export class InventoryService {
   getInventoryDetail(produkId: string) {
     return this.inventoryModel.getInventoryDetail(produkId);
   }
-  
 
-
-  getBatchDetails(batchId: string) { // Changed to batchId
+  getBatchDetails(batchId: string) {
+    // Changed to batchId
     return this.inventoryModel.getBatchDetails(batchId);
   }
 
@@ -27,11 +25,13 @@ export class InventoryService {
     return this.inventoryModel.createBatch(batchData);
   }
 
-  updateBatch(batchId: string, batchData: Partial<InventoryDTO>) { // Changed to batchId
+  updateBatch(batchId: string, batchData: Partial<InventoryDTO>) {
+    // Changed to batchId
     return this.inventoryModel.updateBatch(batchId, batchData);
   }
 
-  deleteBatch(batchId: string) { // Changed to batchId
+  deleteBatch(batchId: string) {
+    // Changed to batchId
     return this.inventoryModel.deleteBatch(batchId);
   }
 }

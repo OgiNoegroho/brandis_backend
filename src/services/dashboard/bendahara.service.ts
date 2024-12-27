@@ -1,3 +1,4 @@
+// //src\services\dashboard\bendahara.service.ts
 import { BendaharaModel } from "../../models/dashboard/bendahara.model";
 
 export class BendaharaService {
@@ -7,16 +8,22 @@ export class BendaharaService {
     this.bendaharaModel = bendaharaModel;
   }
 
-  // BENDAHARA
-
+  // Get financial summary of Faktur Distribusi
   async getRingkasanFakturDistribusi() {
     return this.bendaharaModel.getRingkasanFakturDistribusi();
   }
 
-  async getPendapatanBulanIni() {
-    return this.bendaharaModel.getPendapatanBulanIni();
+  // Get current month revenue with optional filters for outlet or product
+  async getPendapatanBulanIni(outletId?: number, productId?: number) {
+    return this.bendaharaModel.getPendapatanBulanIni(outletId, productId);
   }
 
+  // Get overdue invoices
+  async getOverdueInvoices() {
+    return this.bendaharaModel.getOverdueInvoices();
+  }
+
+  // Get invoices that are due today
   async getFakturJatuhTempoHariIni() {
     return this.bendaharaModel.getFakturJatuhTempoHariIni();
   }

@@ -1,7 +1,7 @@
 // src/models/user.model.ts
 
-import { Pool } from 'pg';
-import { User } from '../types/user.type';
+import { Pool } from "pg";
+import { User } from "../types/pengguna.type";
 
 export class UserModel {
   constructor(private db: Pool) {}
