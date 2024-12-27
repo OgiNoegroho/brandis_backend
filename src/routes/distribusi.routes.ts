@@ -34,15 +34,5 @@ export const distributionRoutes = (dbPool: Pool): Router => {
     distributionController.getFakturDistribusi(req, res)
   );
 
-  // Define the route for updating the status of a faktur
-  router.put("/faktur/:faktur_id/status", authMiddleware, (req, res) =>
-    distributionController.updateFakturStatus(req, res)
-  );
-
-  // Define the route for adding to jumlah_dibayar
-  router.put("/faktur/:faktur_id/jumlah-dibayar", authMiddleware, (req, res) =>
-    distributionController.addToFakturAmountPaid(req, res)
-  );
-
   return router;
 };

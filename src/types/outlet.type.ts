@@ -1,4 +1,4 @@
-// src/types/user.type.ts
+// src/types/outlet.type.ts
 
 export interface Outlet {
   id?: number;

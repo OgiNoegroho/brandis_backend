@@ -11,6 +11,7 @@ import { outletRoutes } from "./routes/outlet.routes";
 import { distributionRoutes } from "./routes/distribusi.routes";
 import { returnRoutes } from "./routes/retur.routes";
 import { salesRoutes } from "./routes/penjualan.routes";
+import { laporanOutletRoutes } from "./routes/laporanOutlet.routes";
 import { expiredBatchRoutes } from "./routes/kadaluarsa.routes";
 import { pimpinanRoutes } from "./routes/dashboard/pimpinan.routes";
 import { manajerRoutes } from "./routes/dashboard/manajer.routes";
@@ -144,6 +145,7 @@ const initializeServer = async () => {
     app.use("/api/", inventoryRoutes(dbPool));
     app.use("/api/", returnRoutes(dbPool));
     app.use("/api/", salesRoutes(dbPool));
+    app.use("/api/", laporanOutletRoutes(dbPool));
     app.use("/api/", pimpinanRoutes(dbPool));
     app.use("/api/", manajerRoutes(dbPool));
     app.use("/api/", pemasaranRoutes(dbPool));
