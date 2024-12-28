@@ -15,7 +15,7 @@ export class NotifikasiFakturModel {
       fd.tanggal_jatuh_tempo,        -- Due date
       fd.status_pembayaran           -- Payment status
     FROM brandis.faktur_distribusi fd
-    WHERE fd.status_pembayaran = 'Menunggu'  -- Only unpaid invoices
+    WHERE fd.status_pembayaran = 'Belum Lunas'  -- Only unpaid invoices
   ),
   updated_invoices AS (
     -- Step 2: Update overdue invoices status to 'Jatuh Tempo'

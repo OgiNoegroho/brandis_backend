@@ -4,12 +4,12 @@ export interface ProductDetails {
 }
 
 export interface ReturnDTO {
-  outlet_id: number;       // The ID of the outlet returning the batch
-  batch_id: number;        // The ID of the batch being returned
-  kuantitas: number;       // Quantity of the batch being returned
-  alasan: string;          // Reason for the return (e.g., "Expired")
+  outlet_id: number;
+  batch_id: number;
+  kuantitas: number;
+  alasan: string;
 }
 
 export interface ReturnResult {
-  return_id: number;       // ID of the newly created return entry
+  return_id: number;
 }

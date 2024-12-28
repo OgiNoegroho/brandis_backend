@@ -2,7 +2,7 @@
 
 export enum StatusPembayaran {
   LUNAS = "Lunas",
-  MENUNGGU = "Menunggu",
+  BELUM_LUNAS = "Belum Lunas",
   JATUH_TEMPO = "Jatuh Tempo",
 }
 

@@ -7,5 +7,5 @@ export interface ExpiredBatchLog {
   moved: boolean;
   created_at: Date;
   updated_at: Date;
-  batch_name?: string; // Optional, populated from the JOIN query
+  batch_name?: string;
 }
