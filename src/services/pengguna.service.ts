@@ -1,4 +1,4 @@
-// src/services/user.service.ts
+// src/services/pengguna.service.ts
 
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";

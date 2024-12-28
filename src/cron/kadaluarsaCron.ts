@@ -1,3 +1,5 @@
+// src\cron\kadaluarsaCron.ts
+
 import cron from "node-cron";
 import { Pool } from "pg";
 import { ExpiredBatchService } from "../services/kadaluarsa.service";

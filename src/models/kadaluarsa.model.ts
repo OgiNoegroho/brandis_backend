@@ -1,3 +1,5 @@
+// src\model\kadaluarsa.model.ts
+
 import { Pool } from "pg";
 import { ExpiredBatchLog } from "../types/kadaluarsa.type";
 

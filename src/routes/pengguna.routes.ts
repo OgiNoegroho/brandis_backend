@@ -1,4 +1,5 @@
-// src/routes/user.route.ts
+// src/routes/pengguna.route.ts
+
 import express, { Request, Response, NextFunction } from "express";
 import { UserController } from "../controllers/pengguna.controller";
 import { Pool } from "pg";

@@ -1,3 +1,5 @@
+// src\types\kadaluarsa.type.ts
+
 export interface ExpiredBatchLog {
   id: number;
   batch_id: number;

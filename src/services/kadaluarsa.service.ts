@@ -1,3 +1,5 @@
+// src\services\kadaluarsa.service.ts
+
 import { ExpiredBatchModel } from "../models/kadaluarsa.model";
 import { ExpiredBatchLog } from "../types/kadaluarsa.type";
 

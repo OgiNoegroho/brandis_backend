@@ -1,4 +1,5 @@
-// src/types/user.type.ts
+// src/types/pengguna.type.ts
+
 export interface User {
   id: number;
   nama: string;                         

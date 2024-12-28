@@ -13,11 +13,13 @@ import { returnRoutes } from "./routes/retur.routes";
 import { salesRoutes } from "./routes/penjualan.routes";
 import { laporanOutletRoutes } from "./routes/laporanOutlet.routes";
 import { expiredBatchRoutes } from "./routes/kadaluarsa.routes";
+// import { notifikasiFakturRoutes } from "./routes/notifikasiFaktur.routes";
 import { pimpinanRoutes } from "./routes/dashboard/pimpinan.routes";
 import { manajerRoutes } from "./routes/dashboard/manajer.routes";
 import { pemasaranRoutes } from "./routes/dashboard/pemasaran.routes";
 import { bendaharaRoutes } from "./routes/dashboard/bendahara.routes";
 import { scheduleExpiredBatchCron } from "./cron/kadaluarsaCron";
+// import { scheduleNotifikasiFakturCron } from "./cron/notifikasiFakturCron";
 
 const app = express();
 const port = process.env.PORT || 3008;
@@ -136,6 +138,7 @@ const initializeServer = async () => {
 
     // Schedule cron job (ensure DB pool is initialized)
     scheduleExpiredBatchCron(dbPool);
+    // scheduleNotifikasiFakturCron(dbPool);
 
     // Mount routes
     app.use("/api/users", userRoutes(dbPool));
@@ -151,6 +154,7 @@ const initializeServer = async () => {
     app.use("/api/", pemasaranRoutes(dbPool));
     app.use("/api/", bendaharaRoutes(dbPool));
     app.use("/api/", expiredBatchRoutes(dbPool));
+    // app.use("/api/", notifikasiFakturRoutes(dbPool));
 
     // Middleware for error handling
     app.use(errorHandler);

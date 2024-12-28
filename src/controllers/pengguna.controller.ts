@@ -1,4 +1,4 @@
-// src/controllers/user.controller.ts
+// src/controllers/pengguna.controller.ts
 
 import { Request, Response } from "express";
 import { UserService } from "../services/pengguna.service";

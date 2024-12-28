@@ -1,3 +1,5 @@
+// src\controllers\kadaluarsa.controller.ts
+
 import { ExpiredBatchService } from "../services/kadaluarsa.service";
 import { ExpiredBatchModel } from "../models/kadaluarsa.model";
 import { Pool } from "pg";

@@ -1,4 +1,4 @@
-// src/models/user.model.ts
+// src/models/pengguna.model.ts
 
 import { Pool } from "pg";
 import { User } from "../types/pengguna.type";
