@@ -9,66 +9,98 @@ export class BendaharaModel {
     this.dbPool = dbPool;
   }
 
-  // Get financial summary of Faktur Distribusi
-  async getRingkasanFakturDistribusi() {
+  // Total Outstanding Invoices
+  async getTotalOutstandingInvoices() {
     const query = `
-        SELECT 
-            status_pembayaran, 
-            SUM(jumlah_tagihan) AS total_tagihan
-        FROM brandis.faktur_distribusi
-        GROUP BY status_pembayaran;
-    `;
+    SELECT 
+      COUNT(*) AS total_outstanding_invoices,
+      SUM(jumlah_tagihan - jumlah_dibayar) AS total_outstanding_amount
+    FROM 
+      brandis.faktur_distribusi
+    WHERE 
+      status_pembayaran IN ('Belum Lunas', 'Jatuh Tempo');
+  `;
     const result = await this.dbPool.query(query);
     return result.rows;
   }
 
-  // Get current month revenue
-  async getPendapatanBulanIni(outletId?: number, productId?: number) {
-    let query = `
-        SELECT SUM(jumlah_dibayar) AS total_pendapatan
-        FROM brandis.faktur_penjualan
-        WHERE DATE_PART('month', dibuat_pada) = DATE_PART('month', CURRENT_DATE)
-          AND DATE_PART('year', dibuat_pada) = DATE_PART('year', CURRENT_DATE)
-    `;
-
-    if (outletId) {
-      query += ` AND outlet_id = $1`;
-    }
-
-    if (productId) {
-      query += ` AND EXISTS (
-                  SELECT 1
-                  FROM brandis.detail_penjualan dp
-                  WHERE dp.penjualan_id = faktur_penjualan.penjualan_id
-                  AND dp.batch_id IN (SELECT id FROM brandis.batch WHERE produk_id = $2)
-                )`;
-    }
-
-    const result = await this.dbPool.query(
-      query,
-      [outletId, productId].filter(Boolean)
-    );
-    return result.rows;
-  }
-
-  // Get overdue invoices
+  // Overdue Invoices
   async getOverdueInvoices() {
     const query = `
-      SELECT id, status_pembayaran, tanggal_faktur, tanggal_jatuh_tempo, jumlah_tagihan, jumlah_dibayar
-      FROM brandis.faktur_penjualan
-      WHERE tanggal_jatuh_tempo < CURRENT_DATE AND status_pembayaran != 'Lunas';
-    `;
+    SELECT 
+      id AS faktur_id,
+      distribusi_id,
+      tanggal_faktur,
+      tanggal_jatuh_tempo,
+      NOW()::DATE - tanggal_jatuh_tempo AS overdue_days,
+      jumlah_tagihan,
+      jumlah_dibayar,
+      (jumlah_tagihan - jumlah_dibayar) AS sisa_tagihan
+    FROM 
+      brandis.faktur_distribusi
+    WHERE 
+      status_pembayaran = 'Jatuh Tempo';
+  `;
     const result = await this.dbPool.query(query);
     return result.rows;
   }
 
-  // Get invoices that are due today
-  async getFakturJatuhTempoHariIni() {
+  // Financial Summary by Outlet
+  async getFinancialSummaryByOutlet() {
     const query = `
-        SELECT COUNT(*) AS faktur_jatuh_tempo
-        FROM brandis.faktur_penjualan
-        WHERE tanggal_jatuh_tempo = CURRENT_DATE;
-    `;
+    SELECT 
+      o.nama AS outlet_name,
+      COUNT(f.id) AS total_invoices,
+      SUM(f.jumlah_tagihan) AS total_tagihan,
+      SUM(f.jumlah_dibayar) AS total_dibayar,
+      SUM(f.jumlah_tagihan - f.jumlah_dibayar) AS total_outstanding
+    FROM 
+      brandis.faktur_distribusi f
+    JOIN 
+      brandis.outlet o ON f.outlet_id = o.id
+    GROUP BY 
+      o.nama
+    ORDER BY 
+      total_outstanding DESC;
+  `;
+    const result = await this.dbPool.query(query);
+    return result.rows;
+  }
+
+  // Returns Summary
+  async getReturnsSummary() {
+    const query = `
+    SELECT 
+      alasan,
+      COUNT(*) AS jumlah_pengembalian,
+      SUM(kuantitas) AS total_kuantitas_dikembalikan
+    FROM 
+      brandis.detail_pengembalian
+    GROUP BY 
+      alasan
+    ORDER BY 
+      total_kuantitas_dikembalikan DESC;
+  `;
+    const result = await this.dbPool.query(query);
+    return result.rows;
+  }
+
+  // Monthly Financial Trends
+  async getMonthlyFinancialTrends() {
+    const query = `
+    SELECT 
+      DATE_TRUNC('month', tanggal_faktur) AS bulan,
+      COUNT(*) AS jumlah_faktur,
+      SUM(jumlah_tagihan) AS total_tagihan,
+      SUM(jumlah_dibayar) AS total_dibayar,
+      SUM(jumlah_tagihan - jumlah_dibayar) AS total_outstanding
+    FROM 
+      brandis.faktur_distribusi
+    GROUP BY 
+      DATE_TRUNC('month', tanggal_faktur)
+    ORDER BY 
+      bulan DESC;
+  `;
     const result = await this.dbPool.query(query);
     return result.rows;
   }

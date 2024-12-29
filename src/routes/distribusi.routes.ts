@@ -9,15 +9,13 @@ import { authMiddleware } from "../middleware/auth";
 
 export const distributionRoutes = (dbPool: Pool): Router => {
   const router = Router();
-
-  // Create instances of the necessary classes
+  
   const distributionModel = new DistributionModel(dbPool);
   const distributionService = new DistributionService(distributionModel);
   const distributionController = new DistributionController(
     distributionService
   );
 
-  // Define the POST route for creating a distribution
   router.post("/distribusi", authMiddleware, (req, res) =>
     distributionController.createDistribution(req, res)
   );

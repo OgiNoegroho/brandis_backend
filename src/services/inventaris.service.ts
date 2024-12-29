@@ -12,6 +12,10 @@ export class InventoryService {
     return this.inventoryModel.getAllBatches();
   }
 
+  getEmptyBatches() {
+    return this.inventoryModel.getEmptyBatches();
+  }
+
   getInventoryDetail(produkId: string) {
     return this.inventoryModel.getInventoryDetail(produkId);
   }

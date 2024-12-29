@@ -19,14 +19,11 @@ import { UserService } from "../services/pengguna.service";
 export const userRoutes = (dbPool: Pool) => {
   const router = express.Router();
 
-  // Initialize UserModel and UserService
   const userModel = new UserModel(dbPool);
   const userService = new UserService(userModel);
 
-  // Initialize UserController with UserService
   const userController = new UserController(userService);
 
-  // Route to register a new user
   router.post(
     "/register",
     validate(createUserValidation),
@@ -36,7 +33,6 @@ export const userRoutes = (dbPool: Pool) => {
     }
   );
 
-  // Route for user login session creation
   router.post(
     "/login",
     validate(createSessionValidation),
@@ -45,7 +41,6 @@ export const userRoutes = (dbPool: Pool) => {
     }
   );
 
-  // Route to get all users
   router.get(
     "/",
     authMiddleware,
@@ -54,7 +49,6 @@ export const userRoutes = (dbPool: Pool) => {
     }
   );
 
-  // Route to get a single user by email
   router.get(
     "/:email",
     authMiddleware,
@@ -63,7 +57,6 @@ export const userRoutes = (dbPool: Pool) => {
     }
   );
 
-  // Route to update a user
   router.put(
     "/:email",
     authMiddleware,
@@ -73,7 +66,6 @@ export const userRoutes = (dbPool: Pool) => {
     }
   );
 
-  // Route to delete a user
   router.delete(
     "/:email",
     authMiddleware,

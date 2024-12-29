@@ -16,9 +16,13 @@ export const inventoryRoutes = (dbPool: Pool): Router => {
     inventoryController.getInventory(req, res)
   );
 
-  router.get("/inventory/batch", authMiddleware, (req, res) =>
-    inventoryController.getAllBatches(req, res)
-  );
+ router.get("/inventory/batch", authMiddleware, (req, res) =>
+   inventoryController.getAllBatches(req, res)
+ );
+
+ router.get("/inventory/batch/empty", authMiddleware, (req, res) =>
+   inventoryController.getEmptyBatches(req, res)
+ );
 
   router.get(
     "/inventory/:produkId", // Route expects produkId

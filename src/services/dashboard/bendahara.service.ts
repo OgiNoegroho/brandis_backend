@@ -8,14 +8,9 @@ export class BendaharaService {
     this.bendaharaModel = bendaharaModel;
   }
 
-  // Get financial summary of Faktur Distribusi
-  async getRingkasanFakturDistribusi() {
-    return this.bendaharaModel.getRingkasanFakturDistribusi();
-  }
-
-  // Get current month revenue with optional filters for outlet or product
-  async getPendapatanBulanIni(outletId?: number, productId?: number) {
-    return this.bendaharaModel.getPendapatanBulanIni(outletId, productId);
+  // Get total outstanding invoices
+  async getTotalOutstandingInvoices() {
+    return this.bendaharaModel.getTotalOutstandingInvoices();
   }
 
   // Get overdue invoices
@@ -23,8 +18,19 @@ export class BendaharaService {
     return this.bendaharaModel.getOverdueInvoices();
   }
 
-  // Get invoices that are due today
-  async getFakturJatuhTempoHariIni() {
-    return this.bendaharaModel.getFakturJatuhTempoHariIni();
+  // Get financial summary by outlet
+  async getFinancialSummaryByOutlet() {
+    return this.bendaharaModel.getFinancialSummaryByOutlet();
+  }
+
+  // Get returns summary
+  async getReturnsSummary() {
+    return this.bendaharaModel.getReturnsSummary();
+  }
+
+  // Get monthly financial trends
+  async getMonthlyFinancialTrends() {
+    return this.bendaharaModel.getMonthlyFinancialTrends();
   }
 }
+

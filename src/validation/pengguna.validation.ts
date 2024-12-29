@@ -33,16 +33,15 @@ export const createSessionValidation = Joi.object({
 
 // Validation schema for updating a user
 export const updateUserValidation = Joi.object({
-  nama: Joi.string().min(3).max(100), // `nama` -> `nama`
+  nama: Joi.string().min(3).max(100),
   password: Joi.string()
     .min(8)
     .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/),
   peran: Joi.string()
-    .valid("Manajer", "Bendahara", "Pemasaran", "Pimpinan") // `peran` -> `role`
+    .valid("Manajer", "Bendahara", "Pemasaran", "Pimpinan")
     .optional(),
-}).min(1); // Require at least one field to be updated
+}).min(1);
 
-// Middleware to validate the payload with Joi validation
 export const validate = (validationFn: Joi.ObjectSchema) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     const { error, value } = validationFn.validate(req.body);

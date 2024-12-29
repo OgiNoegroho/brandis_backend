@@ -31,7 +31,6 @@ export class UserController extends BaseController {
     super();
   }
 
-  // Register a new user
   public async registerUser(req: Request, res: Response): Promise<void> {
     try {
       const newUser = req.body;
@@ -42,7 +41,6 @@ export class UserController extends BaseController {
     }
   }
 
-  // Create a user session (login)
   public async createSession(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
@@ -53,7 +51,6 @@ export class UserController extends BaseController {
     }
   }
 
-  // Get all users
   public async getAllUsers(req: Request, res: Response): Promise<void> {
     try {
       const users = await this.userService.getAllUsers();
@@ -63,7 +60,6 @@ export class UserController extends BaseController {
     }
   }
 
-  // Get a user by email
   public async getUser(req: Request, res: Response): Promise<void> {
     try {
       const email = req.params.email;
@@ -82,7 +78,6 @@ export class UserController extends BaseController {
     }
   }
 
-  // Update a user by email
   public async updateUser(req: Request, res: Response): Promise<void> {
     try {
       const email = req.params.email;
@@ -102,12 +97,11 @@ export class UserController extends BaseController {
     }
   }
 
-  // Delete a user by email
   public async deleteUser(req: Request, res: Response): Promise<void> {
     try {
       const email = req.params.email;
       await this.userService.deleteUser(email);
-      res.status(204).send(); // No content
+      res.status(204).send();
     } catch (error) {
       this.handleError(res, error, "Error deleting user");
     }

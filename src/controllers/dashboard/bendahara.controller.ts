@@ -9,36 +9,21 @@ export class BendaharaController {
     this.bendaharaService = bendaharaService;
   }
 
-  // BENDAHARA
-
-  async getRingkasanFakturDistribusi(req: Request, res: Response) {
+  // Total Outstanding Invoices
+  async getTotalOutstandingInvoices(req: Request, res: Response) {
     try {
-      const ringkasanFakturDistribusi =
-        await this.bendaharaService.getRingkasanFakturDistribusi();
-      res.json(ringkasanFakturDistribusi);
+      const totalOutstandingInvoices =
+        await this.bendaharaService.getTotalOutstandingInvoices();
+      res.json(totalOutstandingInvoices);
     } catch (error) {
-      console.error("Error fetching ringkasan faktur distribusi:", error);
+      console.error("Error fetching total outstanding invoices:", error);
       res
         .status(500)
-        .json({ error: "Failed to fetch ringkasan faktur distribusi" });
+        .json({ error: "Failed to fetch total outstanding invoices" });
     }
   }
 
-  async getPendapatanBulanIni(req: Request, res: Response) {
-    const { outletId, productId } = req.query;
-    try {
-      const pendapatanBulanIni =
-        await this.bendaharaService.getPendapatanBulanIni(
-          parseInt(outletId as string),
-          parseInt(productId as string)
-        );
-      res.json(pendapatanBulanIni);
-    } catch (error) {
-      console.error("Error fetching pendapatan bulan ini:", error);
-      res.status(500).json({ error: "Failed to fetch pendapatan bulan ini" });
-    }
-  }
-
+  // Overdue Invoices
   async getOverdueInvoices(req: Request, res: Response) {
     try {
       const overdueInvoices = await this.bendaharaService.getOverdueInvoices();
@@ -49,16 +34,40 @@ export class BendaharaController {
     }
   }
 
-  async getFakturJatuhTempoHariIni(req: Request, res: Response) {
+  // Financial Summary by Outlet
+  async getFinancialSummaryByOutlet(req: Request, res: Response) {
     try {
-      const fakturJatuhTempoHariIni =
-        await this.bendaharaService.getFakturJatuhTempoHariIni();
-      res.json(fakturJatuhTempoHariIni);
+      const financialSummary =
+        await this.bendaharaService.getFinancialSummaryByOutlet();
+      res.json(financialSummary);
     } catch (error) {
-      console.error("Error fetching faktur jatuh tempo hari ini:", error);
+      console.error("Error fetching financial summary:", error);
+      res.status(500).json({ error: "Failed to fetch financial summary" });
+    }
+  }
+
+  // Returns Summary
+  async getReturnsSummary(req: Request, res: Response) {
+    try {
+      const returnsSummary = await this.bendaharaService.getReturnsSummary();
+      res.json(returnsSummary);
+    } catch (error) {
+      console.error("Error fetching returns summary:", error);
+      res.status(500).json({ error: "Failed to fetch returns summary" });
+    }
+  }
+
+  // Monthly Financial Trends
+  async getMonthlyFinancialTrends(req: Request, res: Response) {
+    try {
+      const monthlyFinancialTrends =
+        await this.bendaharaService.getMonthlyFinancialTrends();
+      res.json(monthlyFinancialTrends);
+    } catch (error) {
+      console.error("Error fetching monthly financial trends:", error);
       res
         .status(500)
-        .json({ error: "Failed to fetch faktur jatuh tempo hari ini" });
+        .json({ error: "Failed to fetch monthly financial trends" });
     }
   }
 }

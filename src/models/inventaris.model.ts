@@ -22,12 +22,12 @@ export class InventoryModel {
           WHEN COALESCE(SUM(CASE 
             WHEN b.tanggal_kadaluarsa >= CURRENT_DATE THEN b.kuantitas
             ELSE 0
-          END), 0) > 10 THEN 'In stock' 
+          END), 0) > 10 THEN 'Stok Tersedia' 
           WHEN COALESCE(SUM(CASE 
             WHEN b.tanggal_kadaluarsa >= CURRENT_DATE THEN b.kuantitas
             ELSE 0
-          END), 0) BETWEEN 1 AND 10 THEN 'Low stock' 
-          ELSE 'Out of stock' 
+          END), 0) BETWEEN 1 AND 10 THEN 'Stok Menipis' 
+          ELSE 'Stok Habis' 
         END AS ketersediaan 
       FROM brandis.produk p
       LEFT JOIN brandis.batch b ON p.id = b.produk_id
@@ -39,18 +39,37 @@ export class InventoryModel {
 
   async getAllBatches(): Promise<BatchDetails[]> {
     const query = `
-      SELECT 
-        b.id AS batch_id,
-        b.nama AS nama_batch,
-        p.nama AS nama_produk,
-        b.kuantitas,
-        b.dibuat_pada,
-        b.tanggal_kadaluarsa
-      FROM brandis.batch b
-      JOIN brandis.produk p ON b.produk_id = p.id
-      WHERE b.tanggal_kadaluarsa >= CURRENT_DATE  -- Exclude expired batches
-      ORDER BY b.id
-    `;
+    SELECT 
+      b.id AS batch_id,
+      b.nama AS nama_batch,
+      p.nama AS nama_produk,
+      b.kuantitas,
+      b.dibuat_pada,
+      b.tanggal_kadaluarsa
+    FROM brandis.batch b
+    JOIN brandis.produk p ON b.produk_id = p.id
+    WHERE b.tanggal_kadaluarsa >= CURRENT_DATE -- Exclude expired batches
+      AND b.kuantitas > 0 -- Exclude empty batches
+    ORDER BY b.id
+  `;
+    const result: QueryResult = await this.dbPool.query(query);
+    return result.rows;
+  }
+
+  async getEmptyBatches(): Promise<BatchDetails[]> {
+    const query = `
+    SELECT 
+      b.id AS batch_id,
+      b.nama AS nama_batch,
+      p.nama AS nama_produk,
+      b.kuantitas,
+      b.dibuat_pada,
+      b.tanggal_kadaluarsa
+    FROM brandis.batch b
+    JOIN brandis.produk p ON b.produk_id = p.id
+    WHERE b.kuantitas = 0 -- Only empty batches
+    ORDER BY b.id
+  `;
     const result: QueryResult = await this.dbPool.query(query);
     return result.rows;
   }
@@ -68,8 +87,8 @@ FROM brandis.batch b
 JOIN brandis.produk p ON b.produk_id = p.id  -- Join to get the product name
 WHERE b.produk_id = $1
   AND b.tanggal_kadaluarsa >= CURRENT_DATE  -- Exclude expired batches
+  AND b.kuantitas > 0  -- Exclude batches with zero quantity
 ORDER BY b.tanggal_kadaluarsa ASC;  -- Order by expiration date in ascending order (earliest first)
-
     `;
     const result: QueryResult = await this.dbPool.query(query, [produkId]);
     return result.rows;

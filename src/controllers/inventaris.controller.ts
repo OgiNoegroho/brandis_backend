@@ -30,6 +30,18 @@ export class InventoryController {
     }
   }
 
+  async getEmptyBatches(req: Request, res: Response): Promise<void> {
+    try {
+      const emptyBatches = await this.inventoryService.getEmptyBatches();
+      res.status(200).json(emptyBatches);
+    } catch (error) {
+      res.status(500).json({
+        message: "Failed to retrieve empty batches",
+        error: String(error),
+      });
+    }
+  }
+
   async getInventoryDetail(req: Request, res: Response): Promise<void> {
     const { produkId } = req.params; // Expect produkId as a route parameter
     try {
