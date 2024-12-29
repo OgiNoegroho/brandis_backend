@@ -1,4 +1,3 @@
-// //src\controllers\dashboard\bendahara.controller.ts
 import { Request, Response } from "express";
 import { BendaharaService } from "../../services/dashboard/bendahara.service";
 
@@ -9,21 +8,6 @@ export class BendaharaController {
     this.bendaharaService = bendaharaService;
   }
 
-  // Total Outstanding Invoices
-  async getTotalOutstandingInvoices(req: Request, res: Response) {
-    try {
-      const totalOutstandingInvoices =
-        await this.bendaharaService.getTotalOutstandingInvoices();
-      res.json(totalOutstandingInvoices);
-    } catch (error) {
-      console.error("Error fetching total outstanding invoices:", error);
-      res
-        .status(500)
-        .json({ error: "Failed to fetch total outstanding invoices" });
-    }
-  }
-
-  // Overdue Invoices
   async getOverdueInvoices(req: Request, res: Response) {
     try {
       const overdueInvoices = await this.bendaharaService.getOverdueInvoices();
@@ -34,40 +18,29 @@ export class BendaharaController {
     }
   }
 
-  // Financial Summary by Outlet
   async getFinancialSummaryByOutlet(req: Request, res: Response) {
     try {
       const financialSummary =
         await this.bendaharaService.getFinancialSummaryByOutlet();
       res.json(financialSummary);
     } catch (error) {
-      console.error("Error fetching financial summary:", error);
-      res.status(500).json({ error: "Failed to fetch financial summary" });
-    }
-  }
-
-  // Returns Summary
-  async getReturnsSummary(req: Request, res: Response) {
-    try {
-      const returnsSummary = await this.bendaharaService.getReturnsSummary();
-      res.json(returnsSummary);
-    } catch (error) {
-      console.error("Error fetching returns summary:", error);
-      res.status(500).json({ error: "Failed to fetch returns summary" });
-    }
-  }
-
-  // Monthly Financial Trends
-  async getMonthlyFinancialTrends(req: Request, res: Response) {
-    try {
-      const monthlyFinancialTrends =
-        await this.bendaharaService.getMonthlyFinancialTrends();
-      res.json(monthlyFinancialTrends);
-    } catch (error) {
-      console.error("Error fetching monthly financial trends:", error);
+      console.error("Error fetching financial summary by outlet:", error);
       res
         .status(500)
-        .json({ error: "Failed to fetch monthly financial trends" });
+        .json({ error: "Failed to fetch financial summary by outlet" });
+    }
+  }
+
+  async getPaymentStatusDistribution(req: Request, res: Response) {
+    try {
+      const paymentStatusDistribution =
+        await this.bendaharaService.getPaymentStatusDistribution();
+      res.json(paymentStatusDistribution);
+    } catch (error) {
+      console.error("Error fetching payment status distribution:", error);
+      res
+        .status(500)
+        .json({ error: "Failed to fetch payment status distribution" });
     }
   }
 }
