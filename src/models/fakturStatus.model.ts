@@ -22,7 +22,7 @@ export class FakturStatusModel {
           jumlah_dibayar
         FROM brandis.faktur_distribusi
         WHERE status_pembayaran = 'Belum Lunas'::brandis.status_pembayaran
-          AND tanggal_jatuh_tempo > CURRENT_DATE
+          AND tanggal_jatuh_tempo <= CURRENT_DATE
       ),
       update_status AS (
         UPDATE brandis.faktur_distribusi
