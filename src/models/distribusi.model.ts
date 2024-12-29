@@ -14,6 +14,7 @@ export class DistributionModel {
   async createDistributionAndFakturTransaction(
     distribution: Distribusi,
     details: DetailDistribusi[],
+    faktur_id: string,
     status_pembayaran: StatusPembayaran,
     tanggal_faktur: string,
     tanggal_jatuh_tempo: string

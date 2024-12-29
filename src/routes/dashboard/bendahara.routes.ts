@@ -14,7 +14,6 @@ export const bendaharaRoutes = (dbPool: Pool): Router => {
   const bendaharaService = new BendaharaService(bendaharaModel);
   const bendaharaController = new BendaharaController(bendaharaService);
 
-  // Define routes with authentication middleware
   router.get(
     "/bendahara/totalOutstandingInvoices",
     authMiddleware,
